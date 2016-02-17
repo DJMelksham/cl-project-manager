@@ -10,11 +10,22 @@
 (defparameter *module-names* nil)
 (defparameter *module-paths* nil)
 
-(defparameter *project-structure* '())
+
+(defparameter *project-structure* '((commonlisp)
+				    (config)
+				    (tests)
+				    .gitignore ""
+				    LICENCE ""
+				    README.md ""))
+  
+(defun get-project-structure ()
+  default-structure))
+
+(defun get-project-name (&optional active-project (get-active-project))
+
+)
 
 (defun make-project (pathname)
-
-  
 
 )
 
@@ -75,26 +86,53 @@
 
 )
 
-(defun create-test-directory (path)
+(defun make-test-directory (path)
 
 )
 
-(defun create-config-directory (path)
+(defun make-config-directory (path)
 
 )
 
-(defun create-licence-file (path)
+(defun make-git-ignore (&optional (additional-list-of-text nil))
+  (let ((string (format nil "~{~a~%~}" 
+			(append (list "#Ignore emacs editor temporary files"
+				      "[#]*[#]"
+				      "*~"
+				      ""
+				      "#Ignore cl-project-manager files")
+				additional-list-of-text))))
+    string))
 
-)
+(defun create-licence-file (&optional other-licence-file)
+  (let ((string "All Rights Reserved."))
+    string))
 
-(defun create-readme-file (path)
-
-)
+(defun create-readme-file (&optional 
+			     (project-name (get-project-name) project-name-supplied-p)
+			     ()
+  (let ((string format nil "~{~a~%~}"
+		(list (if project-name-supplied-p 
+			  project-name 
+			  "## Synopsis")
+		      ""
+		      "At the top of the file there should be a short introduction and/ or overview that explains **what** the project is."
+		      ""
+		      "## Motivation"
+		      ""
+		      "A short description of the motivation behind the creation and maintenance of the project. This should explain **why** the project exists."
+		      ""
+		      "## Installation"
+		      ""
+		      "Load the automatically generated file 'load-project.lisp' in your common lisp repl"
+		      ""
+		      "## Author"
+		      ""
+		      "Damien John Melksham"
+		      ""
+)))))
 
 (defun create-test-file (path)
 
 )
 
-(defun make-pathname-from-string (path-string)
-
-)
