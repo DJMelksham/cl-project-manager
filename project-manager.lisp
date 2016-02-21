@@ -1,138 +1,113 @@
-(in-package :cl-user)
-(defpackage cl-project-manager
-  (:use :cl))
-(in-package :cl-project-manager)
-
-;; body
-(defparameter *active-project* nil)
+(defparameter *active-project-name* nil)
 (defparameter *active-project-path* nil)
-(defparameter *active-module* nil)
-(defparameter *module-names* nil)
+(defparameter *active-module-name* nil)
+(defparameter *module-names-in-project* nil)
+(defparameter *module-names-in-module nil)
 (defparameter *module-paths* nil)
 
-
-(defparameter *project-structure* '((commonlisp)
-				    (config)
-				    (tests)
-				    .gitignore ""
-				    LICENCE ""
-				    README.md ""))
+(defparameter *active-project-structure* nil)
   
 (defun get-project-structure ()
-  default-structure))
+  *active-project-structure*)
 
-(defun get-project-name (&optional active-project (get-active-project))
+(defun get-project-name ()
+  *active-project-name*)
 
-)
+(defun make-project (name path &optional (make-active t)
+				         (default-structure t)
+				         (authors (list "Damien John Melksham")))
+  (let ((project-path (pathname path)))
 
-(defun make-project (pathname)
+    ;; create project directory if it doesn't exist
+    (ensure-directories-exist project-path :verbose t)
+    
+    ;; create default project structure
+    (create-default-project-structure project-path name authors)
 
-)
+    ;; set as active project if requested
+    ;(when make-active
+    ; (set-active-project project-path))
 
-(defun valid-project-p (pathname)
-)
+project-path))
 
-(defun valid-module-p (pathname)
-)
+(defun create-default-project-structure (project-path name authors)
+  (ensure-directories-exist 
+   (cl-fad:merge-pathnames-as-directory project-path (pathname "tests/")))
 
-(defun set-active-project (pathname)
+  (with-open-file (output-file (merge-pathnames project-path ".gitignore")
+			       :direction :output
+			       :if-does-not-exist :create
+			       :if-exists nil)
+    (prin1 (make-git-ignore) output-file))
 
-)
+  (with-open-file (output-file (merge-pathnames project-path "LICENCE")
+			       :direction :output
+			       :if-does-not-exist :create
+			       :if-exists nil)
+    (prin1 (create-licence-text) output-file))
 
-(defun get-active-project ()
+  (with-open-file (output-file (merge-pathnames project-path "README.md")
+			       :direction :output
+			       :if-does-not-exist :create
+			       :if-exists nil)
+    (prin1 (create-readme-text name authors) output-file)))
 
-)
+;(defun valid-project-p (pathname)
+;nil)
 
-(defun set-active-module (pathname)
+;(defun valid-module-p (pathname)
+;nil)
 
-)
+;(defun set-active-project (pathname)
+;nil)
 
-(defun get-active-module ()
+;(defun get-active-project ()
+;nil)
 
-)
+;(defun set-active-module (pathname)
+;nil)
 
-(defun list-modules ()
+;(defun get-active-module ()
+;nil)
 
-)
+;(defun list-modules ()
+;nil)
 
-(defun list-module-paths ()
+;(defun list-module-paths ()
+;nil)
 
-)
+;(defun test-project (pathname)
+;nil)
 
-(defun test-project (pathname)
+;(defun test-module (pathname)
+;nil)
 
-)
+;(defun test-file (pathname)
+;nil)
 
-(defun test-module (pathname)
+;(defun make-test-file ()
+;nil)
 
-)
+;(defun make-module-load-file (module)
+;nil)
 
-(defun test-file (pathname)
+;(defun make-git-ignore-file (pathname)
+;nil)
 
-)
+;(defun make-module-load-order-file (module &optional load-order-list)
+;nil)
 
-(defun make-module-load-file (module)
+;(defun make-test-directory (path)
+;nil)
 
-)
+;(defun make-config-directory (path)
+;nil)
 
-(defun make-project-load-file (module)
+;(defun create-test-file (path)
+;nil)
 
-)
+;(defun make-module-structure-from-list (input-list)
+;nil)
 
-(defun make-git-ignore-file (pathname)
-)
-
-(defun make-module-load-order-file (module &optional load-order-list)
-
-)
-
-(defun make-test-directory (path)
-
-)
-
-(defun make-config-directory (path)
-
-)
-
-(defun make-git-ignore (&optional (additional-list-of-text nil))
-  (let ((string (format nil "~{~a~%~}" 
-			(append (list "#Ignore emacs editor temporary files"
-				      "[#]*[#]"
-				      "*~"
-				      ""
-				      "#Ignore cl-project-manager files")
-				additional-list-of-text))))
-    string))
-
-(defun create-licence-file (&optional other-licence-file)
-  (let ((string "All Rights Reserved."))
-    string))
-
-(defun create-readme-file (&optional 
-			     (project-name (get-project-name) project-name-supplied-p)
-			     ()
-  (let ((string format nil "~{~a~%~}"
-		(list (if project-name-supplied-p 
-			  project-name 
-			  "## Synopsis")
-		      ""
-		      "At the top of the file there should be a short introduction and/ or overview that explains **what** the project is."
-		      ""
-		      "## Motivation"
-		      ""
-		      "A short description of the motivation behind the creation and maintenance of the project. This should explain **why** the project exists."
-		      ""
-		      "## Installation"
-		      ""
-		      "Load the automatically generated file 'load-project.lisp' in your common lisp repl"
-		      ""
-		      "## Author"
-		      ""
-		      "Damien John Melksham"
-		      ""
-)))))
-
-(defun create-test-file (path)
-
-)
-
+;(defun make-list-from-module-structure (project)
+;nil)
