@@ -7,6 +7,3 @@
     (loop for dir in dirs
 	  do (setf result (append (get-subfolders dir) result)))
     (nreverse result)))
-
-(defun true-name-string (path)
-  (namestring (truename path)))

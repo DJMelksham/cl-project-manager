@@ -1,10 +1,11 @@
-(defun make-git-ignore (&optional (additional-list-of-text nil))
+(defun make-git-ignore-text (&optional (additional-list-of-text nil))
   (let ((string (format nil "~{~a~%~}" 
 			(append (list "#Ignore emacs editor temporary files"
 				      "[#]*[#]"
 				      "*~"
 				      ""
-				      "#Ignore cl-project-manager files")
+				      "#Ignore cl-project-manager files"
+				      "*.config")
 				additional-list-of-text))))
     string))
 
@@ -12,9 +13,9 @@
   (let ((string "All Rights Reserved."))
     string))
 
-(defun create-readme-text (name authors) 
+(defun create-readme-text (project-name authors) 
   (format nil "~{~a~%~}"
-	  (list (concatenate 'string "## " (string-upcase name))
+	  (list (concatenate 'string "## " (string-upcase project-name))
 		""
 		"At the top of the file there should be a short introduction and/ or overview that explains **what** the project is."
 		""
@@ -24,9 +25,8 @@
 		""
 		"## Installation"
 		""
-		" Load the generated file 'load-project.lisp' in your common lisp repl"
+		"Load the generated file 'load-project.lisp' in your common lisp repl"
 		""
 		"## Author"
 		""
-		authors
-		"")))
+		authors)))

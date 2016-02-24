@@ -13,23 +13,6 @@
 (defun get-project-name ()
   *active-project-name*)
 
-(defun make-project (name path &optional (make-active t)
-				         (default-structure t)
-				         (authors (list "Damien John Melksham")))
-  (let ((project-path (pathname path)))
-
-    ;; create project directory if it doesn't exist
-    (ensure-directories-exist project-path :verbose t)
-    
-    ;; create default project structure
-    (create-default-project-structure project-path name authors)
-
-    ;; set as active project if requested
-    ;(when make-active
-    ; (set-active-project project-path))
-
-project-path))
-
 (defun create-default-project-structure (project-path name authors)
   (ensure-directories-exist 
    (cl-fad:merge-pathnames-as-directory project-path (pathname "tests/")))
@@ -51,6 +34,23 @@ project-path))
 			       :if-does-not-exist :create
 			       :if-exists nil)
     (prin1 (create-readme-text name authors) output-file)))
+
+(defun make-project (name path &optional (make-active t)
+				         (default-structure t)
+				         (authors (list "Damien John Melksham")))
+  (let ((project-path (pathname path)))
+
+    ;; create project directory if it doesn't exist
+    (ensure-directories-exist project-path :verbose t)
+    
+    ;; create default project structure
+    (create-default-project-structure project-path name authors)
+
+    ;; set as active project if requested
+    ;(when make-active
+    ; (set-active-project project-path))
+
+project-path))
 
 ;(defun valid-project-p (pathname)
 ;nil)

@@ -23,31 +23,33 @@
        (simple-error () nil)))))
 
 (defun git-init (path)
-  (let* ((true-path (truename (pathname path)))
+  (let* ((existing-dir (ensure-directories-exist (cl-fad:pathname-as-directory path)))
+	 (true-path (truename existing-dir))
 	 (true-name-string (namestring true-path)))
       (values (run-git (list "init" true-name-string))
 	      true-path)))
 
 (defun git-add-all (path)
-  (let* ((true-path (truename (pathname path)))
+  (let* ((true-path (truename (cl-fad:pathname-as-directory path)))
 	 (true-name-string (namestring true-path)))
     (values (run-git (list "add" "-A") true-name-string)
 	    true-path)))
 
 (defun git-status (path)
-  (let* ((true-path (truename (pathname path)))
+  (let* ((true-path (truename (cl-fad:pathname-as-directory path)))
 	 (true-name-string (namestring true-path)))
     (values (run-git (list "status") true-name-string)
 	    true-path)))
 
-(defun git-commit (path message)
-  (let* ((true-path (truename (pathname path)))
+(defun git-commit (path &optional 
+			  (message "Initial commit made automatically by cl-project-management"))
+  (let* ((true-path (truename (cl-fad:pathname-as-directory path)))
 	 (true-name-string (namestring true-path)))
-    (values (run-git (list "commit" "-m") true-name-string)
+    (values (run-git (list "commit" "-m" message) true-name-string)
 	    true-path)))
 
 (defun is-git-folder-p (path-to-be-searched)
- (let* ((true-path (cl-fad:pathname-as-directory (truename (pathname path-to-be-searched))))
+ (let* ((true-path (truename (cl-fad:pathname-as-directory path-to-be-searched)))
 	 (true-name-string (namestring true-path)))
    (if (and (cl-fad:directory-exists-p true-path)
 	    (search "/.git/" true-name-string))
@@ -57,14 +59,7 @@
 (defun get-subfolders-without-git (path)
   (remove-if #'is-git-folder-p (get-subfolders path)))
 
-(defun is-git-project-p (path)
-  (or (cl-fad:directory-exists-p 
-       (cl-fad:merge-pathnames-as-directory 
-	(cl-fad:pathname-as-directory path)
-	(cl-fad:pathname-as-directory ".git/")))
-      (string= (run-git (list "status") (path))
-)
-
 (defun is-in-git-project-p (path)
-
-)
+  (not (search "fatal: Not a git repository" 
+	       (run-git (list "status") 
+			(namestring (cl-fad:pathname-as-directory path))))))
