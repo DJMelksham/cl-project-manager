@@ -48,18 +48,7 @@
     (values (run-git (list "commit" "-m" message) true-name-string)
 	    true-path)))
 
-(defun is-git-folder-p (path-to-be-searched)
- (let* ((true-path (truename (cl-fad:pathname-as-directory path-to-be-searched)))
-	 (true-name-string (namestring true-path)))
-   (if (and (cl-fad:directory-exists-p true-path)
-	    (search "/.git/" true-name-string))
-      T
-      NIL)))
-
-(defun get-subfolders-without-git (path)
-  (remove-if #'is-git-folder-p (get-subfolders path)))
-
-(defun is-in-git-project-p (path)
+(defun path-in-git-project-p (path)
   (not (search "fatal: Not a git repository" 
 	       (run-git (list "status") 
 			(namestring (cl-fad:pathname-as-directory path))))))

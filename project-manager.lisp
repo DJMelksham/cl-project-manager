@@ -67,7 +67,7 @@
       nil)
 
     ;; Initialise Git Repository in Project and estbalish first commit
-    (when (not (is-in-git-project-p project-path))
+    (when (not (path-in-git-project-p project-path))
        (git-init project-path)
        (git-add-all project-path)
        (git-commit project-path))
