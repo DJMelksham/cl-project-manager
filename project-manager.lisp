@@ -1,12 +1,3 @@
-(defparameter *active-project-name* nil)
-(defparameter *active-project-path* nil)
-(defparameter *active-module-name* nil)
-(defparameter *module-names-in-project* nil)
-(defparameter *module-names-in-module nil)
-(defparameter *module-paths* nil)
-
-(defparameter *active-project-structure* nil)
-  
 (defun get-project-structure ()
   *active-project-structure*)
 
@@ -21,7 +12,6 @@
 (defun set-active-module (name)
   name)
   
-
 (defun create-default-project-structure (project-path project-name authors)
   (ensure-directories-exist 
    (cl-fad:merge-pathnames-as-directory project-path (pathname "tests/")))

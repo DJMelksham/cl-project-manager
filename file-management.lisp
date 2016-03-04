@@ -38,21 +38,34 @@
   (cond ((null structure) nil)
         ((atom structure) (list structure))
         (t (mapcan #'flatten-list structure))))
-
-(defun get-type-structure (path type)
-  (flet ((is-type-p (thing type-type) (if (string= (pathname-type thing) type-type)
-					  thing
-					  nil)))
-   
-    (loop for things in (remove-if #'git-folder-p (cl-fad:list-directory path))
-	 collect (if (cl-fad:directory-pathname-p things)
-		     (get-type-structure things type)
-		     (if (is-type-p things type)
-			 things
-			 nil)))))
 		     
-
 (defun ends-with-p (str1 str2)
   "Determine whether `str1` ends with `str2`"
   (let ((p (mismatch str2 str1 :from-end T)))
     (or (not p) (= 0 p))))
+
+(defun last-directory-equals-string (path string)
+  (let ((real-string string))
+
+    (if (not (equal (char string 0) #\/)) 
+	(setf real-string (concatenate 'string "/" real-string)))
+
+    (if (not (equal (char string (max 0 
+				      (- (length string) 1))) 
+		    #\/))
+	(setf real-string (concatenate 'string real-string "/")))       
+
+  (ends-with-p (directory-namestring path) real-string))) 
+	       
+(defun ensure-folders-exist-in-tree (path folder-name)
+ (let* ((valid-dirs (remove-if 
+		     (lambda (x) (last-directory-equals-string x folder-name))	       
+		     (flatten-list (get-path-folders-without-git
+				   path t)))))
+
+   (loop for dir in valid-dirs
+      do (ensure-directories-exist 
+	  (cl-fad:merge-pathnames-as-directory
+	   dir
+	   (cl-fad:pathname-as-directory folder-name))))))
+
