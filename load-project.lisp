@@ -5,8 +5,13 @@
 
 (ql:quickload 'cl-fad)
 
-(load (merge-pathnames "variable-definitions.lisp" *load-truename*))
-(load (merge-pathnames "document-functions.lisp" *load-truename*))
-(load (merge-pathnames "file-management.lisp" *load-truename*))
-(load (merge-pathnames "git-management.lisp" *load-truename*))
-(load (merge-pathnames "project-manager.lisp" *load-truename*))
+(defun relative-load (filename)
+  (load (merge-pathnames filename *load-truename*)))
+
+(relative-load "variable-definitions.lisp")
+(relative-load "document-functions.lisp")
+(relative-load "file-management.lisp")
+(relative-load "git-management.lisp")
+(relative-load "project-manager.lisp")
+(relative-load "utility.lisp")
+(relative-load "config-management.lisp")
