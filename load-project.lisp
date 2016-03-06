@@ -14,4 +14,4 @@
 (relative-load "git-management.lisp")
 (relative-load "project-manager.lisp")
 (relative-load "utility.lisp")
-(relative-load "config-management.lisp")
+(relative-load "config-low-level-functions.lisp")

@@ -11,7 +11,7 @@
 
 (defun set-active-module (name)
   name)
-  
+
 (defun create-default-project-structure (project-path project-name authors)
   (ensure-directories-exist 
    (cl-fad:merge-pathnames-as-directory project-path (pathname "tests/")))

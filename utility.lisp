@@ -21,3 +21,7 @@
     (loop for thing in filtered-tree
 	 do (funcall apply-func thing))))
 
+(defun tail-of-path (path)
+  (if (cl-fad:directory-pathname-p path)
+      (first (last (pathname-directory path)))
+      (pathname-name path)))
