@@ -79,3 +79,12 @@
 				   &optional
 				     (quicklisp-marker 'QUICKLISP))
   (add-value-to-config-key library-designator quicklisp-marker config-list))
+
+(defun designate-rules-status (config-list
+			   &optional 
+			     (rules-status 'off)
+			     (rules-status-marker 'rules))
+
+  (if (string-equals rules-status 'off)
+      (add-value-to-config-key 'off rules-status-marker config-list)
+      (remove-key-from-config-list rules-status-marker config-list)))
