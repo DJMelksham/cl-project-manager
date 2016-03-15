@@ -25,3 +25,22 @@
   (if (cl-fad:directory-pathname-p path)
       (first (last (pathname-directory path)))
       (pathname-name path)))
+
+(defun flatten-list (structure)
+  (cond ((null structure) nil)
+        ((atom structure) (list structure))
+        (t (mapcan #'flatten-list structure))))
+
+(defun ends-with-p (str1 str2)
+  "Determine whether `str1` ends with `str2`"
+  (let ((p (mismatch str2 str1 :from-end T)))
+    (or (not p) (= 0 p))))
+
+(defun insert-after (list index new-element)
+
+  (let ((length (length list)))
+    (cond ((null list) (return-from insert-after (list new-element)))
+	  ((> index (- length 1))
+	   (push new-element (cdr (nthcdr (- length 1) list)))) 
+	  (t (push new-element (cdr (nthcdr index list)))))
+    list))

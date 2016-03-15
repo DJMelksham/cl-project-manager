@@ -1,17 +1,3 @@
-(defun get-project-structure ()
-  *active-project-structure*)
-
-(defun get-project-name ()
-  *active-project-name*)
-
-(defun set-active-project (pathname name)
-  (setf *active-project-path* pathname) 
-  (setf *active-project-name* name)
-  *active-project-path*)
-
-(defun set-active-module (name)
-  name)
-
 (defun create-default-project-structure (project-path project-name authors)
   (ensure-directories-exist 
    (cl-fad:merge-pathnames-as-directory project-path (pathname "tests/")))
@@ -63,57 +49,3 @@
        (git-commit project-path))
 
 project-path))
-
-;(defun valid-project-p (pathname)
-;nil)
-
-;(defun valid-module-p (pathname)
-;nil)
-
-;(defun get-active-project ()
-;nil)
-
-;(defun get-active-module ()
-;nil)
-
-;(defun list-modules ()
-;nil)
-
-;(defun list-module-paths ()
-;nil)
-
-;(defun test-project (pathname)
-;nil)
-
-;(defun test-module (pathname)
-;nil)
-
-;(defun test-file (pathname)
-;nil)
-
-;(defun make-test-file ()
-;nil)
-
-;(defun make-module-load-file (module)
-;nil)
-
-;(defun make-git-ignore-file (pathname)
-;nil)
-
-;(defun make-module-load-order-file (module &optional load-order-list)
-;nil)
-
-;(defun make-test-directory (path)
-;nil)
-
-;(defun make-config-directory (path)
-;nil)
-
-;(defun create-test-file (path)
-;nil)
-
-;(defun make-module-structure-from-list (input-list)
-;nil)
-
-;(defun make-list-from-module-structure (project)
-;nil)

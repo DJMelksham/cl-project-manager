@@ -20,9 +20,6 @@
 (defun get-path-folders-without-git (path &optional (inclusive nil))
   (remove-if #'git-folder-p (get-subfolders path inclusive)))
 
-(defun get-project-folders ()
-  (get-path-folders-without-git *active-project-path* t))
-
 (defun get-module-folders ()
   (get-path-folders-without-git *active-module-path* t))
 
@@ -33,17 +30,7 @@
 		collect (if (cl-fad:directory-pathname-p things)
 			    (get-directory-structure things)
 			    things))))
-
-(defun flatten-list (structure)
-  (cond ((null structure) nil)
-        ((atom structure) (list structure))
-        (t (mapcan #'flatten-list structure))))
 		     
-(defun ends-with-p (str1 str2)
-  "Determine whether `str1` ends with `str2`"
-  (let ((p (mismatch str2 str1 :from-end T)))
-    (or (not p) (= 0 p))))
-
 (defun last-directory-equals-string (path string)
   (let ((real-string string))
 
@@ -69,3 +56,38 @@
 	   dir
 	   (cl-fad:pathname-as-directory folder-name))))))
 
+    
+(defun path-from-name (name &optional  
+			      (path *active-module-path*))
+  
+  (if (or (null path)
+	  (null name)
+	  (and (not (stringp name))
+	       (not (symbolp name))))
+      (return-from path-from-name nil))
+
+  (let ((search-space (sort (cl-fad:list-directory path)
+			    (lambda (x y) (cond ((and (cl-fad:directory-pathname-p x)
+						      (not (cl-fad:directory-pathname-p y))) t)
+						(t nil)))))
+	(search-term (string name))
+	(result nil))
+    
+    (loop 
+       for item in search-space
+       do (if (string= search-term (tail-of-path item))
+	      (setf result item))
+	 until (string= search-term (tail-of-path item)))
+
+    (if (null result)
+	(loop for item in search-space
+	   do (if (string= search-term (concatenate 'string 
+						    (tail-of-path item)
+						    "."
+						    (pathname-type item)))
+		  (setf result item))
+	     until (string= search-term (concatenate 'string 
+						    (tail-of-path item)
+						    "."
+						    (pathname-type item)))))
+    result))
