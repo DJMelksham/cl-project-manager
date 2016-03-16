@@ -52,3 +52,11 @@
   (not (search "fatal: Not a git repository" 
 	       (run-git (list "status") 
 			(namestring (cl-fad:pathname-as-directory path))))))
+
+(defun git-folder-p (path-to-be-searched)
+ (let* ((true-path (truename (cl-fad:pathname-as-directory path-to-be-searched)))
+	 (true-name-string (namestring true-path)))
+   (if (and (cl-fad:directory-exists-p true-path)
+	    (search "/.git/" true-name-string))
+      T
+      NIL)))

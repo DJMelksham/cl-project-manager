@@ -1,3 +1,8 @@
+(defun flatten-list (structure)
+  (cond ((null structure) nil)
+        ((atom structure) (list structure))
+        (t (mapcan #'flatten-list structure))))
+
 (defun func-list-applicator (func-or-list)
   (cond ((and (not (functionp func-or-list))
 	      (not (listp func-or-list))) 
@@ -8,28 +13,11 @@
 	 (funcall (car func-or-list)))
 	(t (apply (car func-or-list) 
 		  (cdr func-or-list)))))
-    
-(defun apply-to-project-tree (path &optional (predicate-funcs (list (lambda (x) x))) (apply-func #'identity) (not-git t))
-  (let* ((flat-tree (if not-git 
-		       (remove-if #'git-folder-p (flatten-list (get-directory-structure path)))
-		       (flatten-list (get-directory-structure path))))
-	(filtered-tree flat-tree))
-
-    (loop for predicate in predicate-funcs
-	 do (setf filtered-tree (remove-if-not predicate filtered-tree)))
-    
-    (loop for thing in filtered-tree
-	 do (funcall apply-func thing))))
 
 (defun tail-of-path (path)
   (if (cl-fad:directory-pathname-p path)
       (first (last (pathname-directory path)))
       (pathname-name path)))
-
-(defun flatten-list (structure)
-  (cond ((null structure) nil)
-        ((atom structure) (list structure))
-        (t (mapcan #'flatten-list structure))))
 
 (defun ends-with-p (str1 str2)
   "Determine whether `str1` ends with `str2`"

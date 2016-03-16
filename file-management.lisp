@@ -9,14 +9,6 @@
 	  do (setf result (append (get-subfolders dir) result)))
     (nreverse result)))
 
-(defun git-folder-p (path-to-be-searched)
- (let* ((true-path (truename (cl-fad:pathname-as-directory path-to-be-searched)))
-	 (true-name-string (namestring true-path)))
-   (if (and (cl-fad:directory-exists-p true-path)
-	    (search "/.git/" true-name-string))
-      T
-      NIL)))
-
 (defun get-path-folders-without-git (path &optional (inclusive nil))
   (remove-if #'git-folder-p (get-subfolders path inclusive)))
 

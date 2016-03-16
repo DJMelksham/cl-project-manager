@@ -117,6 +117,24 @@
   
   t)
 
+(defun insert-priority (identifier &optional (priority-position 0))
+  (return-nil-if-no-active-module insert-priority)
+  
+  (let ((ident (path-from-name identifier)))
+    
+    (cond ((null ident)
+	   (progn
+	     (format t "Unable to find identifier in ~a.  Unable to prioritise." 
+		     (tail-of-path *active-module-path*))
+	     (return-from insert-priority nil)))
+	  (t (progn 
+	       (update-config (insert-value-into-config-key priority-position identifier 'PRIORITY *active-module-config*))
+	       (format t "~a prioritised at position ~a by cl-project-manager in ~a:~%" 
+		       ident
+		       (position identifier (values-from-config-list 'PRIORITY *active-module-config*) :test #'equal)
+		       (tail-of-path *active-module-path*))
+	       t)))))
+
 (defun set-explicit-priority-list (&rest identifiers)
   (return-nil-if-no-active-module set-explicit-priority-list)
   
@@ -137,24 +155,6 @@
     
     (loop for item in items-to-insert
 	 do (insert-priority item))))
-
-(defun insert-priority (identifier &optional (priority-position 0))
-  (return-nil-if-no-active-module insert-priority)
-  
-  (let ((ident (path-from-name identifier)))
-    
-    (cond ((null ident)
-	   (progn
-	     (format t "Unable to find identifier in ~a.  Unable to prioritise." 
-		     (tail-of-path *active-module-path*))
-	     (return-from insert-priority nil)))
-	  (t (progn 
-	       (update-config (insert-value-into-config-key priority-position identifier 'PRIORITY *active-module-config*))
-	       (format t "~a prioritised at position ~a by cl-project-manager in ~a:~%" 
-		       ident
-		       (position identifier (values-from-config-list 'PRIORITY *active-module-config*) :test #'equal)
-		       (tail-of-path *active-module-path*))
-	       t)))))
 
 (defun priority? ()
   (return-nil-if-no-active-module priority?)
@@ -183,26 +183,6 @@
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defun make-module (path &optional (active-module-once-made t))
-  (let ((creation-status (if (probe-file path)
-			     (make-module-if-exists path)
-			     (make-module-if-not-exists path))))
-
-  (if (and active-module-once-made
-	   creation-status
-	   (module-p path))
-      (active-module path))))
-
-(defun make-module-if-exists (path)
-  path
-)
-
-(defun make-module-if-not-exists (path)
-  path
-)
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
 (defun active-module (&optional (module-identifier nil))
 
   (cond ((null module-identifier) 
@@ -227,6 +207,27 @@
   (validate-module)
 
 *active-module-path*)
+
+(defun make-module-if-exists (path)
+  path
+)
+
+(defun make-module-if-not-exists (path)
+  path
+)
+
+(defun make-module (path &optional (active-module-once-made t))
+  (let ((creation-status (if (probe-file path)
+			     (make-module-if-exists path)
+			     (make-module-if-not-exists path))))
+
+  (if (and active-module-once-made
+	   creation-status
+	   (module-p path))
+      (active-module path))))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
