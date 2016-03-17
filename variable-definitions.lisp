@@ -5,4 +5,4 @@
 (defparameter *module-config-name* "module-config.meta")
 (defparameter *test-config-name* "test-config.meta")
 (defparameter *other-config-name* "config.meta")
-(defparameter *authors* (list "Damien John Melksham"))
+(defparameter *authors* nil)

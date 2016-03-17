@@ -5,7 +5,7 @@
 				      "*~"
 				      ""
 				      "#Ignore cl-project-manager files"
-				      "*.config")
+				      *module-config-name*)
 				additional-list-of-text))))
     string))
 

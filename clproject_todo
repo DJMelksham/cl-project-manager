@@ -1,7 +1,7 @@
 make-module
 active-module
 validate-module
-insert-use?
+add-use-list?
 insert-import?
 add-export-list?
 

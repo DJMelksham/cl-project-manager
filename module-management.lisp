@@ -71,7 +71,6 @@
   ;;return nil if there is some reason it didn't work
   T)
 
-
 (defun add-shadow (symbol-ident)
 
   (return-nil-if-no-active-module add-shadow)  
@@ -290,7 +289,6 @@
     (format t "REAL PRIORTIES FOR ~a MODULE:~%" (string-upcase (tail-of-path *active-module-path*)))
     (format t "~{~a~%~}" priority-values)))
 
-
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defun validate-module ()
@@ -333,7 +331,8 @@
 )
 
 (defun make-module-if-not-exists (path)
-  path
+  (ensure-directories-exist (cl-fad:pathname-as-directory path))
+  
 )
 
 (defun make-module (path &optional (active-module-once-made t))
