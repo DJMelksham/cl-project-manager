@@ -25,7 +25,6 @@
     
     (setf config 
 	  (designate-load-file (concatenate 'string "load-" (tail-of-path path) ".lisp") config))
-    ;(designate-load-priority (auto-populate-priority path))
 
     (config-to-disk path config)))
 
@@ -127,7 +126,6 @@
   ;;edit later to perform checks and things before adding to config
   ;;return nil if there is some reason it didn't work
   T)
-
 
 (defun add-import (library-name symbol-ident)
 
@@ -326,25 +324,92 @@
 
 *active-module-path*)
 
-(defun make-module-if-exists (path)
-  path
-)
+(defun make-module (path &key (make-active t) (git-ignore-file t) (template-documents t) (init-git t))
 
-(defun make-module-if-not-exists (path)
-  (ensure-directories-exist (cl-fad:pathname-as-directory path))
-  
-)
+  (let* ((dir-path (cl-fad:pathname-as-directory path))
+	 (test-path (merge-pathnames (cl-fad:pathname-as-directory *test-dir-name*) dir-path))
+	 (git-ignore (merge-pathnames dir-path ".gitignore"))
+	 (licence (merge-pathnames dir-path "LICENCE"))
+	 (README (merge-pathnames dir-path "README.md")))
+    
+    (if (module-p dir-path)
+	(progn
+	  (format t "~a is already a managed module!" dir-path) 
+	  (return-from make-module dir-path)))
+    
+    ;;Prompt the user to be sure as to their request
+    (if (probe-file dir-path)
+	(format t "Note: The path '~a' already exists.~%" dir-path)
+	(format t "The path '~a' does not exist and will be created if you proceed." dir-path))
+    
+    (format t
+	    "~%Common Lisp Project Manager will define a module in ~a~%with the following basic settings:~%
+   Make the module active after being created: ~a
+   Place a default .gitignore file in module: ~a
+   Place some helper template documents (licence/Readme) in the module: ~a
+   Author to be added in the Readme if created: ~a
+   Initialise a new git repository and first commit in module: ~a~%"
+	    dir-path
+	    make-active
+	    git-ignore-file
+	    template-documents
+	    *authors*
+	    init-git)
+    (format *query-io* 
+	    "~%Are you sure you wish to make the resulting managed Common Lisp module (Y/N?): ")
+    (force-output *query-io*)
+    (if (not (string= (string-upcase (read-line *query-io*)) "Y"))
+	(progn 
+	  (format t "Aborting module creation.")
+	  (return-from make-module)))
+    
+    ;;create the module directory
+    (ensure-directories-exist dir-path :verbose t)
+    ;;create the module test directory
+    (ensure-directories-exist test-path :verbose t)
+    
+    (if git-ignore-file
+	(if (probe-file git-ignore)
+	    (format t "~&.gitignore file already exists.  I'm gonna leave it alone.~&")
+	    (with-open-file (output-file git-ignore
+					 :direction :output
+					 :if-does-not-exist :create
+					 :if-exists nil)
+	      (prin1 (make-git-ignore-text) output-file))))
+    
+    (if template-documents
+	(if (probe-file licence)
+	    (format t "~&licence file already exists.  I'm gonna leave it alone.~&")
+	    (with-open-file (output-file licence
+				     :direction :output
+				     :if-does-not-exist :create
+				     :if-exists nil)
+	      (prin1 (create-licence-text) output-file)))
+	
+	(if (probe-file README)
+	    (format t "~&README.md file already exists.  I'm gonna leave it alone.~&")
+	    (with-open-file (output-file readme
+					 :direction :output
+					 :if-does-not-exist :create
+					 :if-exists nil)
+	      (prin1 (create-readme-text (tail-of-path dir-path) *authors*) output-file))))
+    
+    ;; Create the module's basic configuration file - which identifies it as a managed module
+    (make-module-config dir-path) 
 
-(defun make-module (path &optional (active-module-once-made t))
-  (let ((creation-status (if (probe-file path)
-			     (make-module-if-exists path)
-			     (make-module-if-not-exists path))))
-
-  (if (and active-module-once-made
-	   creation-status
-	   (module-p path))
-      (active-module path))))
-
+    (if init-git
+	(if (not (path-in-git-project-p dir-path))
+	    (progn
+	      (git-init dir-path)
+	      (git-add-all dir-path)
+	      (git-commit dir-path))
+	    (format t "~&Module is already part of a .git repository.  I'm gonna leave the .git repository alone.~&")))
+    
+    (if (and make-active
+	     (module-p dir-path))
+	(active-module dir-path))
+    
+    dir-path))
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 

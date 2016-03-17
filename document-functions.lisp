@@ -4,8 +4,7 @@
 				      "[#]*[#]"
 				      "*~"
 				      ""
-				      "#Ignore cl-project-manager files"
-				      *module-config-name*)
+				      "#Ignore cl-project-manager files")
 				additional-list-of-text))))
     string))
 
