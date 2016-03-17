@@ -53,6 +53,126 @@
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+(defun add-export (symbol-ident)
+
+  (return-nil-if-no-active-module add-export)  
+  (let ((sym (string-upcase (string symbol-ident))))
+  (update-config (add-value-to-config-key sym 'EXPORT *active-module-config*))
+  
+  ;;edit later to perform checks and things before adding to config
+  ;;return nil if there is some reason it didn't work
+  T))
+
+(defun remove-export (symbol-ident)
+  (return-nil-if-no-active-module remove-export)
+  (update-config (remove-value-from-config-key (string-upcase (string symbol-ident)) 'EXPORT *active-module-config*))
+  
+  ;;edit later to perform checks and things before adding to config
+  ;;return nil if there is some reason it didn't work
+  T)
+
+
+(defun add-shadow (symbol-ident)
+
+  (return-nil-if-no-active-module add-shadow)  
+  (let ((sym (string-upcase (string symbol-ident))))
+  (update-config (add-value-to-config-key sym 'SHADOW *active-module-config*))
+  
+  ;;edit later to perform checks and things before adding to config
+  ;;return nil if there is some reason it didn't work
+  T))
+
+(defun remove-shadow (symbol-ident)
+  (return-nil-if-no-active-module remove-shadow)
+  (update-config (remove-value-from-config-key (string-upcase (string symbol-ident)) 'SHADOW *active-module-config*))
+  
+  ;;edit later to perform checks and things before adding to config
+  ;;return nil if there is some reason it didn't work
+  T)
+
+(defun add-use (library-name)
+
+  (return-nil-if-no-active-module add-use)  
+  (let ((lib (string-upcase (string library-name))))
+  (update-config (add-value-to-config-key lib 'USE *active-module-config*))
+  
+  ;;edit later to perform checks and things before adding to config
+  ;;return nil if there is some reason it didn't work
+  T))
+
+(defun remove-use (library-name)
+  (return-nil-if-no-active-module remove-use)
+  (update-config (remove-value-from-config-key (string-upcase (string library-name)) 'USE *active-module-config*))
+  
+  ;;edit later to perform checks and things before adding to config
+  ;;return nil if there is some reason it didn't work
+  T)
+
+(defun add-library-alias (library-name alias)
+
+  (return-nil-if-no-active-module add-library-alias)  
+  (let ((lib-alias-list (cons (string-upcase (string library-name))
+			      (string-upcase (string alias)))))
+    (update-config (add-value-to-config-key lib-alias-list 'LIBRARY-ALIAS *active-module-config*))
+  
+  ;;edit later to perform checks and things before adding to config
+  ;;return nil if there is some reason it didn't work
+  T))
+
+(defun remove-library-alias (library-name alias)
+  (return-nil-if-no-active-module remove-library-alias)
+  (update-config (remove-value-from-config-key (cons (string-upcase (string library-name))
+						     (string-upcase (string alias))) 
+					       'LIBRARY-ALIAS *active-module-config*))
+  
+  ;;edit later to perform checks and things before adding to config
+  ;;return nil if there is some reason it didn't work
+  T)
+
+
+(defun add-import (library-name symbol-ident)
+
+  (return-nil-if-no-active-module add-import)  
+  (let ((lib (cons (string-upcase (string library-name))
+		   (string-upcase (string symbol-ident)))))
+    (update-config (add-value-to-config-key lib 'IMPORT *active-module-config*))
+  
+  ;;edit later to perform checks and things before adding to config
+  ;;return nil if there is some reason it didn't work
+  T))
+
+(defun remove-import (library-name symbol-ident)
+  (return-nil-if-no-active-module remove-import)
+  (update-config (remove-value-from-config-key (cons (string-upcase (string library-name))
+						     (string-upcase (string symbol-ident))) 
+					       'IMPORT *active-module-config*))
+  
+  ;;edit later to perform checks and things before adding to config
+  ;;return nil if there is some reason it didn't work
+  T)
+
+(defun add-shadow-import (library-name symbol-ident)
+
+  (return-nil-if-no-active-module add-shadow-import)  
+  (let ((lib (cons (string-upcase (string library-name))
+		   (string-upcase (string symbol-ident)))))
+    (update-config (add-value-to-config-key lib 'SHADOW-IMPORT *active-module-config*))
+  
+  ;;edit later to perform checks and things before adding to config
+  ;;return nil if there is some reason it didn't work
+  T))
+
+(defun remove-shadow-import (library-name symbol-ident)
+  (return-nil-if-no-active-module remove-shadow-import)
+  (update-config (remove-value-from-config-key (cons (string-upcase (string library-name))
+						     (string-upcase (string symbol-ident))) 
+					       'SHADOW-IMPORT *active-module-config*))
+  
+  ;;edit later to perform checks and things before adding to config
+  ;;return nil if there is some reason it didn't work
+  T)
+
+
 (defun add-quicklisp-lib (library-name)
 
   (return-nil-if-no-active-module add-quicklisp-lib)  

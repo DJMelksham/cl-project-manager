@@ -1,19 +1,9 @@
 make-module
 active-module
 validate-module
-add-library-alias
-remove-library-alias
-add-use
-remove-use
-add-import
-remove-import
-add-export
-remove-export
-add-shadow
-remove-shadow
-add-shadow-import
-remove-shadow-import
-
+insert-use?
+insert-import?
+add-export-list?
 
 *test-status*
 run-test
