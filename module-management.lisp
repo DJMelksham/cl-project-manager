@@ -324,6 +324,9 @@
 
 *active-module-path*)
 
+
+;;; Seems to be a bug in the .gitignore creation.  My file in my gittest folder had nothing in it.
+;;;  Fix it yo' fool!
 (defun make-module (path &key (make-active t) (git-ignore-file t) (template-documents t) (init-git t))
 
   (let* ((dir-path (cl-fad:pathname-as-directory path))
