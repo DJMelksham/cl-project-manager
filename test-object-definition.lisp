@@ -1,5 +1,11 @@
 (defclass test ()
-  ((name
+  (
+   (id
+    :initarg :id
+    :initform (error "Test must be assigned a unique integer identifier")
+    :accessor id
+    :documentation 
+   (name
     :initarg :name
     :initform (error "A test must have a unique identifiable name.")
     :accessor name
