@@ -15,3 +15,12 @@
     (loop until (null (nth-value 1 (gethash x *test-ids*)))
 	 do (incf x))
     x)) 
+
+;;; This function is currently there as a copy/prototype of one in the test object's
+;;; expectation table.
+ 
+(defun condition-of-type (type function &rest arguments)
+  (multiple-value-bind (x y)
+      (ignore-errors (apply function arguments))
+    (if (null x)
+	(typep y type))))
