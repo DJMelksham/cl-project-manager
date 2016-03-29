@@ -1,0 +1,9 @@
+(defun hash-ext-array-insert (key value hash)
+  (if (nth-value 1 (gethash key hash))
+      (vector-push-extend value (gethash key hash))
+      (setf (gethash key hash) (make-array 1 
+					   :element-type 'integer 
+					   :initial-element value
+					   :adjustable t
+					   :fill-pointer 1)))
+      (fill-pointer (gethash key hash)))
