@@ -15,5 +15,9 @@
 (relative-load "file-management.lisp")
 (relative-load "config-low-level-functions.lisp")
 (relative-load "module-management.lisp")
+(relative-load "test-variable-definitions.lisp")
+(relative-load "test-utilities.lisp")
+(relative-load "test-object-definition.lisp")
+
 ;(relative-load "project-manager.lisp")
 ;(relative-load "test-management.lisp")

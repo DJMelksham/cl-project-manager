@@ -10,18 +10,12 @@
 (defun expect-equalp ()
   nil)
 
-(let ((x 0))
-  (defun new-test-id ()
-    (loop until (null (nth-value 1 (gethash x *test-ids*)))
-	 do (incf x))
-    x))
-
 (defun register-test (test)
   (setf (gethash (id test) *test-ids*) test)
   (setf (gethash (name test) *test-names*) test)
   (loop for tag in (tags test)
        with id = (id test)
-     do (hash-ext-array-insert (tag id *test-tag-ids*)))
+     do (hash-ext-array-insert tag id *test-tag-ids*))
   (setf (gethash (id test) *test-paths*) 
 	(cl-fad:merge-pathnames-as-file *active-module-path* (file-on-disk test))))
 
@@ -46,7 +40,11 @@
     (if (null x)
 	(typep y type))))
 
-(defgeneric serialise (path object)
+(defgeneric serialise (path object 
+		       &optional human-readible)
   (:documentation "Write an object out to disk."))
 
+(defun deserialise (path)
+  "Read a serialised object in from disk"
+path)
 
