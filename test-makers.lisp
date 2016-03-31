@@ -47,6 +47,12 @@
 	       (cl-fad:merge-pathnames-as-file *active-module-path* real-fod))
        (return-from make-test nil)))
  
+;;producing test file description
+ 
+ (if (or (not description)
+	 (not (stringp description)))
+     (setf real-desc "No valid description has been supplied for this test.")
+     (setf real-desc description)
 
 
 )
