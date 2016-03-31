@@ -8,15 +8,60 @@
 		    expected-value
 		    before-function-source
 		    after-function-source)
-     
+  (let* ((real-id (new-test-id))
+	 (real-name nil)
+	 (real-fod nil)
+	 (real-desc nil)
+	 (real-exp nil)
+	 (real-tags nil)
+	 (real-source nil)
+	 (real-compiled-source nil)
+	 (real-expected-value nil)
+	 (real-bfs nil)
+	 (real-compiled-bfs nil)
+	 (real-compiled-afs nil))
+
+;;producing test name
+
+ (if (not name) 
+     (setf real-name (concatenate 'string "TEST-" (write-to-string id)))
+     (setf real-name (string-upcase name)))
+ 
+ (if (gethash real-name *test-names*)
+     (progn
+       (format t "The name ~a is already registered to Test ID ~a~&" 
+	       real-name
+	       (id (gethash real-name *test-names*)))
+       (return-from make-test nil)))
+
+;;producing test file-name on disk 
+
+ (if (not file-on-disk)
+     (setf real-fod (concatenate 'string real-name ".test"))
+     (setf real-fod (concatenate 'string file-on-disk ".test")))
+ 
+ (if (probe (cl-fad:merge-pathnames-as-file *active-module-path* real-fod))
+     (progn
+       (format t "A file or test named ~a was already found at ~a~&" 
+	       real-fod
+	       (cl-fad:merge-pathnames-as-file *active-module-path* real-fod))
+       (return-from make-test nil)))
+ 
+
 
 )
 
-(defun delete-test (&key
-		      id
-		      name)
+(defun delete-test (identifier)
+  (let ((test (cond ((integerp identifier) (gethash identifier *test-ids*))
+		    ((stringp identifier) (gethash identifier *test-names*))
+		    (t (return-from delete-test nil)))))
+    (with-accessors ((id id)
+		     (name name)
+		     (tags tags)
+		     (file-on-disk file-on-disk)) test
 
-)
+      (delete-file (gethash id *test-paths*))
+      (deregister-test test))))
 
 (defun config-structure-to-test (config-structure)
 
