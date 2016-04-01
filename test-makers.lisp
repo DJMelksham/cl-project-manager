@@ -17,7 +17,7 @@
 	 (real-source nil)
 	 (real-compiled-source nil)
 	 (real-expected-value nil)
-	 (real-bfs nil)
+	 (real-before-function-source nil)
 	 (real-compiled-bfs nil)
 	 (real-compiled-afs nil))
 
@@ -51,10 +51,78 @@
  
  (if (or (not description)
 	 (not (stringp description)))
-     (setf real-desc "No valid description has been supplied for this test.")
-     (setf real-desc description)
+     (setf real-desc "No valid description has been supplied for this test.~&")
+     (setf real-desc description))
 
+;;producing test expectation
+;hardcoded test expectations for now...
+ (cond ((null expectation) 
+	(setf real-exp "EQUALP"))
+       ((member (string-upcase expectation)
+		(list "EQ" "EQL" "EQUAL" "EQUALP" "NULL" "NOTNULL" "T" "CONDITION-OF-TYPE"))
+	(setf real-exp (string-upcase expectation)))
+       (t (progn
+	    (format t "Expectation ~a is not a valid kind of expectation.~&" exp)
+	    (format t "Expectation must be one of ~S, ~S, ~S, ~S, ~S, ~S, ~S, or ~S.~&"
+		    "EQ"
+		    "EQL"
+		    "EQUAL"
+		    "EQUALP"
+		    "NULL"
+		    "NOTNULL"
+		    "T"
+		    "CONDITION-OF-TYPE")
+	    (return-from make-test nil))))
 
+;;producing test tags
+
+ (if (or (not (listp tags))
+	 (notevery #'stringp tags))
+     (setf real-tags nil)
+     (setf real-tags tags))
+
+;;producing test source
+ (cond ((null source)
+	(progn
+	  (format t "You must provide a valid lisp expression that can be used for the test.")
+	  (return-from make-test nil)))
+       ((and (listp source) (not equal (car source) 'lambda))
+	(setf real-source (list 'lambda nil source)))
+       ((and (listp source) (equal (car source) 'lambda))
+	(setf real-source source))
+       (t 
+	(setf real-source (list 'lambda nil source))))
+
+;;producing test compiled source
+;;assumes SBCL-esque default behaviour where everything is compiled unless otherwise
+;;stated.  May need to be changed if this lisp code is ever made purely portable.
+ (setf real-compiled-source (eval real-source))
+
+;;producing test expected value
+ (if (null expected-value)
+     (setf real-expected-value T)
+     (setf real-expected-value expected-value))
+
+;;producing test before-function-source
+ (cond ((null before-function-source)
+        (setf real-before-function-source nil))
+       ((and (listp before-function-source) (not equal (car before-function-source) 'lambda))
+	(setf real-before-function-source (list 'lambda nil before-function-source)))
+       ((and (listp before-function-source) (equal (car before-function-source) 'lambda))
+	(setf real-before-function-source before-function-source))
+       (t 
+	(setf real-before-function-source (list 'lambda nil before-function-source))))
+;;producing test before-function-compiled
+ (if (null real-before-function-source)
+     nil
+     (setf real-compiled-before-function-source (eval real-before-function-source)))
+
+ 
+;;producing test after-function-source
+
+;;producing test after-function-compiled
+
+nil
 )
 
 (defun delete-test (identifier)

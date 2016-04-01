@@ -119,9 +119,9 @@
 (make-instance 'test
 	       :id 1
 	       :name "Random Name"
-	       :file-on-disk "test1.test"
-	       :description "Creating an initial test test object"
-	       :expectation "EQ"
+	       :file-on-disk "test1"
+	       :description "Creating a test test object"
+	       :expectation "EQUALP"
 	       :tags nil
 	       :source '(lambda () 1)
 	       :compiled-form (lambda () 1)
