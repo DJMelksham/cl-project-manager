@@ -93,11 +93,11 @@
     :type 'list
     :accessor before-function-source
     :documentation "Source for a zero argument function that will be funcall'd before the test.")
-   (before-function-compiled
-    :initarg :before-function-compiled
+   (before-function-compiled-form
+    :initarg :before-function-compiled-form
     :initform (lambda () nil)
     :type 'function
-    :accessor before-function-compiled
+    :accessor before-function-compiled-form
     :documentation "A compiled zero argument function that will be funcall'd  before the test.")
    (after-function-source
     :initarg :after-function-source
@@ -105,11 +105,11 @@
     :type 'list
     :accessor after-function-source
     :documentation "Source for a zero argument function that will be funcall'd after the test.")
-   (after-function-compiled
-    :initarg :after-function-compiled
+   (after-function-compiled-form
+    :initarg :after-function-compiled-form
     :initform (lambda () nil)
     :type 'function
-    :accessor after-function-compiled
+    :accessor after-function-compiled-form
     :documentation "A compiled zero argument function that will be funcall'd after the test")))
 
 
@@ -130,6 +130,29 @@
 	       :status nil
 	       :result nil
 	       :before-function-source nil
-	       :before-function-compiled (lambda () 1)
+	       :before-function-compiled-form (lambda () 1)
 	       :after-function-source nil
-	       :after-function-compiled (lambda () 1))
+	       :after-function-compiled-form (lambda () 1))
+
+(defmethod print-object ((object test) stream)
+    (print-unreadable-object (object stream :type t)
+      (with-accessors ((id id)
+		       (name name)
+		       (file-on-disk file-on-disk)
+		       (description description)
+		       (expectation expectation)
+		       (tags tags)
+		       (source source)
+		       (expected-value expected-value)
+		       (run-value run-value)
+		       (status status)
+		       (result result)
+		       (before-function-source before-function-source)
+		       (after-function-source after-function-source)) object
+	(format stream "~& TEST ID: ~a~& NAME: ~a~& FILE-ON-DISK: ~a~& TEST DESCRIPTION: ~a~& EXPECTATION TYPE: ~a~& TAGS: ~a~& TEST SOURCE: ~a~& TEST EXPECTED VALUE: ~a"		
+		id name file-on-disk description expectation tags source expected-value)
+	(if run-value (format stream "~& LAST RUN VALUE OF TEST: ~a" run-value))
+	(if status (format stream "~& LAST TEST RUN COMPLETED SUCCESSFULLY: ~a" status))
+	(if result (format stream "~& TEST PASSED ON LAST RUN?: ~a" result))
+	(if before-function-source (format stream "~& SOURCE OF FUNCTION THAT RUNS BEFORE THE TEST: ~a" before-function-source))
+	(if after-function-source (format stream "~& SOURCE OF FUNCTION THAT RUNS AFTER THE TEST: ~a" after-function-source)))))
