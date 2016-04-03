@@ -18,9 +18,8 @@
 (relative-load "test-variable-definitions.lisp")
 (relative-load "test-utilities.lisp")
 (relative-load "test-object-definition.lisp")
-(relative-load "test-helpers.lisp")
-
-;(relative-load "test-makers.lisp")
+(relative-load "test-makers.lisp")
+(relative-load "test-runner.lisp")
 ;(relative-load "test-functions.lisp")
 
 ;(relative-load "project-manager.lisp")

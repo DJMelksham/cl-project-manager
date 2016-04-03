@@ -8,7 +8,7 @@
 		    source
 		    expected-value
 		    run-value
-		    status
+		    run-time
 		    result
 		    before-function-source
 		    after-function-source)
@@ -155,25 +155,14 @@
 		   :compiled-form real-compiled-form
 		   :expected-value real-expected-value
 		   :run-value run-value
-		   :status status
+		   :run-time run-time
 		   :result result
 		   :before-function-source real-before-function-source
 		   :before-function-compiled-form real-compiled-before-function-form
 		   :after-function-source real-after-function-source
 		   :after-function-compiled-form real-compiled-after-function-form)))
 
-(defun delete-test (identifier)
-  (let ((test (cond ((typep identifier 'test) identifier) 
-		    ((integerp identifier) (gethash identifier *test-ids*))
-		    ((stringp identifier) (gethash identifier *test-names*))
-		    (t (return-from delete-test nil)))))
-    (with-accessors ((id id)
-		     (name name)
-		     (tags tags)
-		     (file-on-disk file-on-disk)) test
 
-      (delete-file (gethash id *test-paths*))
-      (deregister-test test))))
 
 (defun config-structure-to-test (config-structure)
   (let ((id (values-from-config-list 'ID config-structure))
@@ -185,7 +174,7 @@
 	(source (values-from-config-list 'SOURCE config-structure))
 	(expected-value (values-from-config-list 'EXPECTED-VALUE config-structure))
 	(run-value (values-from-config-list 'RUN-VALUE config-structure))
-	(status (values-from-config-list 'STATUS config-structure))
+	(run-time (values-from-config-list 'RUN-TIME config-structure))
 	(result (values-from-config-list 'RESULT config-structure))
 	(before-function-source (values-from-config-list 'BEFORE-FUNCTION-SOURCE config-structure))
 	(after-function-source (values-from-config-list 'AFTER-FUNCTION-SOURCE config-structure)))
@@ -200,7 +189,7 @@
 	 :source (car source)
 	 :expected-value (car expected-value)
 	 :run-value (car run-value)
-	 :status (car status)
+	 :run-time (car run-time)
 	 :result (car result)
 	 :before-function-source (car before-function-source)
 	 :after-function-source (car after-function-source))))
@@ -217,7 +206,7 @@
 		     (source source)
 		     (expected-value expected-value)
 		     (run-value run-value)
-		     (status status)
+		     (run-time run-time)
 		     (result result)
 		     (before-function-source before-function-source)
 		     (after-function-source after-function-source)) test
@@ -226,7 +215,7 @@
       (setf config-structure (add-value-to-config-key before-function-source 'before-function-source config-structure))
       (setf config-structure (add-value-to-config-key expected-value 'expected-value config-structure))
       (setf config-structure (add-value-to-config-key result 'result config-structure))
-      (setf config-structure (add-value-to-config-key status 'status config-structure))
+      (setf config-structure (add-value-to-config-key run-time 'run-time config-structure))
       (setf config-structure (add-value-to-config-key run-value 'run-value config-structure))
       (setf config-structure (add-value-to-config-key source 'source config-structure))
       (setf config-structure (add-value-to-config-key tags 'tags config-structure))
@@ -237,3 +226,49 @@
       (setf config-structure (add-value-to-config-key id 'id config-structure))
 
       config-structure)))
+
+(defun register-test (test)
+
+  (if (gethash (id test) *test-ids*)
+	(error (concatenate 'string "A test with ID " (write-to-string (id test)) " is already registered. Change the ID before registering again, or deregister the other test first.")))
+
+  (if (gethash (string-upcase (name test)) *test-names*)
+	(error (concatenate 'string "A test named " (string-upcase (name test)) " is already registered. Change the nameof the test before registering again, or deregister the other test first.")))
+
+  (setf (gethash (id test) *test-ids*) test)
+  (setf (gethash (name test) *test-names*) test)
+  (loop for tag in (tags test)
+       with id = (id test)
+     do (hash-ext-array-insert tag id *test-tag-ids*))
+  (setf (gethash (id test) *test-id-paths*) 
+	(cl-fad:merge-pathnames-as-file *active-module-path* *test-dir-name* (file-on-disk test)))
+
+  ;;need a function in here to add before and after tag functions
+  ;;or rather, I think just add it onto the tag-object and load the tag objects
+  ;;at a later date
+
+  (config-to-disk (cl-fad:merge-pathnames-as-directory *active-module-path* *test-dir-name*) 
+		  (test-to-config-structure test)
+		  (file-on-disk test))
+
+  test)
+
+(defun deregister-test (identifier)
+  (let ((test (cond ((typep identifier 'test) identifier) 
+		    ((integerp identifier) (gethash identifier *test-ids*))
+		    ((stringp identifier) (gethash (string-upcase identifier) *test-names*))
+		    (t (return-from deregister-test nil)))))
+    (with-accessors ((id id)
+		     (name name)
+		     (tags tags)
+		     (file-on-disk file-on-disk)) test
+
+      (delete-file (gethash id *test-id-paths*))
+
+      (remhash id *test-ids*)
+    (remhash name *test-names*)
+    (loop for tag in tags
+	 do (hash-ext-array-remove tag id *test-tag-ids*))
+    (remhash id *test-id-paths*))
+
+    test))

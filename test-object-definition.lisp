@@ -77,11 +77,11 @@
     :initform nil
     :accessor run-value
     :documentation "The last value obtained (if any) when the test function was last applied successfully")
-   (status
-    :initarg :status
+   (run-time
+    :initarg :run-time
     :initform nil
-    :accessor status
-    :documentation "A T or NIL flag to determine whether the test completed successfully when called")
+    :accessor run-time
+    :documentation "The time taken for the test to complete, including before/after functions.")
    (result
     :initarg :result
     :initform nil
@@ -112,28 +112,6 @@
     :accessor after-function-compiled-form
     :documentation "A compiled zero argument function that will be funcall'd after the test")))
 
-
-;;; Simple example make-instance call, probably never to be used by user...
-;;; Will put some interfacing macros and functions around it instead.
-
-(make-instance 'test
-	       :id 1
-	       :name "Random Name"
-	       :file-on-disk "test1"
-	       :description "Creating a test test object"
-	       :expectation "EQUALP"
-	       :tags nil
-	       :source '(lambda () 1)
-	       :compiled-form (lambda () 1)
-	       :expected-value T
-	       :run-value nil
-	       :status nil
-	       :result nil
-	       :before-function-source nil
-	       :before-function-compiled-form (lambda () 1)
-	       :after-function-source nil
-	       :after-function-compiled-form (lambda () 1))
-
 (defmethod print-object ((object test) stream)
     (print-unreadable-object (object stream :type t)
       (with-accessors ((id id)
@@ -145,14 +123,18 @@
 		       (source source)
 		       (expected-value expected-value)
 		       (run-value run-value)
+		       (run-time run-time)
 		       (status status)
 		       (result result)
 		       (before-function-source before-function-source)
 		       (after-function-source after-function-source)) object
-	(format stream "~& TEST ID: ~a~& NAME: ~a~& FILE-ON-DISK: ~a~& TEST DESCRIPTION: ~a~& EXPECTATION TYPE: ~a~& TAGS: ~a~& TEST SOURCE: ~a~& TEST EXPECTED VALUE: ~a"		
-		id name file-on-disk description expectation tags source expected-value)
+	(format stream "~& TEST ID: ~a~& NAME: ~a~& FILE-ON-DISK: ~a~& TEST DESCRIPTION: ~a~& EXPECTATION TYPE: ~a~& TAGS: ~a~& TEST EXPECTED VALUE: ~a~&"		
+		id name file-on-disk description expectation tags expected-value)
+
+	(format stream "~& TEST SOURCE: ")
+	(format stream "~{~a~^~&~}" (cddr source))
 	(if run-value (format stream "~& LAST RUN VALUE OF TEST: ~a" run-value))
-	(if status (format stream "~& LAST TEST RUN COMPLETED SUCCESSFULLY: ~a" status))
+	(if run-time (format stream "~& RUN-TIME IN SECONDS: ~a" run-time))
 	(if result (format stream "~& TEST PASSED ON LAST RUN?: ~a" result))
 	(if before-function-source (format stream "~& SOURCE OF FUNCTION THAT RUNS BEFORE THE TEST: ~a" before-function-source))
 	(if after-function-source (format stream "~& SOURCE OF FUNCTION THAT RUNS AFTER THE TEST: ~a" after-function-source)))))
