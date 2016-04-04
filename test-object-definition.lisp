@@ -9,11 +9,8 @@
 		      (gethash "NULL" ex-table) #'null
 		      (gethash "NOTNULL" ex-table) (lambda (x) (NOT (NULL x)))
 		      (gethash "T" ex-table) (lambda (x) (eq T x))
-		      (gethash "CONDITION-OF-TYPE" ex-table) (lambda (type function &rest arguments)
-							       (multiple-value-bind (x y)
-								   (ignore-errors (apply function arguments))
-								 (if (null x)
-								     (typep y type)))))
+		      (gethash "CONDITION-OF-TYPE" ex-table) (lambda (type x)
+								     (typep x type)))
 		ex-table)
     :type 'hash-table
     :accessor expectation-table

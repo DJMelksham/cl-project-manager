@@ -17,6 +17,7 @@
 (relative-load "module-management.lisp")
 (relative-load "test-variable-definitions.lisp")
 (relative-load "test-utilities.lisp")
+(relative-load "test-tag-definition.lisp")
 (relative-load "test-object-definition.lisp")
 (relative-load "test-makers.lisp")
 (relative-load "test-runner.lisp")

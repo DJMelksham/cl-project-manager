@@ -40,13 +40,6 @@
 	  (return-from make-test nil)))
 
     ;;producing test file-name on disk 
-    
-    (if (null *active-module-path*)
-	(progn
-	  (format t "You must define a test in the context of an active module.~&")
-	  (format t "No active module is currently defined in *active-module-path*~&")
-	  (format t "Define an active module via the function (active-module).~&")
-	  (return-from make-test nil)))
 	  
     (cond ((not file-on-disk) (setf real-fod (concatenate 'string real-name ".test")))
 	  ((and (stringp file-on-disk) (ends-with-p file-on-disk ".test"))
@@ -57,7 +50,7 @@
     
     (if (or (not description)
 	    (not (stringp description)))
-	(setf real-desc "No valid description has been supplied for this test.~&")
+	(setf real-desc "No valid description has been supplied for this test.")
 	(setf real-desc description))
     
     ;;producing test expectation
@@ -137,14 +130,11 @@
 	(setf real-compiled-after-function-form *test-empty-function*)
 	(setf real-compiled-after-function-form (eval real-after-function-source)))
     
-    ;;With pre-req's done, make the test instance
-    ;;##################
-    ;;This must include writing out to disk
-    ;;and registering the test into the project management system
-    ;;So remember to put that in once the serialisation routines are done
-    ;;##################
 
-    (make-instance 'test
+    ;;register the test's tags?
+  
+
+        (make-instance 'test
 		   :id real-id
 		   :name real-name
 		   :file-on-disk real-fod
