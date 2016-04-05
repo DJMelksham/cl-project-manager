@@ -116,13 +116,101 @@
 	final-tag))
 
 (defun config-structure-to-test-tag (config-structure)
-config-structure)
+  (let ((name (values-from-config-list 'NAME config-structure))
+	(description (values-from-config-list 'DESCRIPTION config-structure))
+	(before-function-source (values-from-config-list 'BEFORE-FUNCTION-SOURCE config-structure))
+	(after-function-source (values-from-config-list 'AFTER-FUNCTION-SOURCE config-structure)))
+    
+    (make-test-tag :name (car name)
+		   :description (car description)
+		   :before-function-source (car before-function-source)
+		   :after-function-source (car after-function-source))))
 
-(defun test-tag-to-config-structure (config-structure)
-  config-structure)
+(defun test-tag-to-config-structure (test-tag)
+  (let ((config-structure ()))
+    (with-accessors ((name name)
+		     (description description)
+		     (before-function-source before-function-source)
+		     (after-function-source after-function-source)) test-tag
 
-(defun test-tag-to-disk (test-tag)
-test-tag)
+    (setf config-structure (add-value-to-config-key after-function-source 'after-function-source config-structure))
+    (setf config-structure (add-value-to-config-key before-function-source 'before-function-source config-structure))
+    (setf config-structure (add-value-to-config-key description 'description config-structure))
+    (setf config-structure (add-value-to-config-key name 'name config-structure))
+    
+    config-structure)))
 
-(defun read-test-tag-from-disk (test-tag)
- test-tag)
+(defun test-tag-to-disk (file-pathname tag)
+  (let* ((test-tag (cond ((typep tag 'test-tag) tag)
+			 ((stringp tag) (gethash (string-upcase tag) *test-tags*))
+			 (t (return-from test-tag-to-disk nil))))
+	 (config (test-tag-to-config-structure test-tag)))
+
+    (with-open-file (stream file-pathname
+			  :direction :output
+			  :if-exists :supersede
+			  :if-does-not-exist :create)
+    (format stream "(")
+    (loop for key in config
+       do (format stream "~&(")
+       do (format stream "~S~%" (first key))
+	  (format stream "~{    ~S~^~%~}" (cdr key))
+       do (format stream ")"))
+    (format stream ")"))
+    file-pathname))
+
+(defun test-tag-from-disk (file-pathname)
+  (let ((*read-eval* nil))
+	(with-open-file (stream file-pathname
+				:direction :input
+				:if-does-not-exist nil)
+	  
+	 (config-structure-to-test-tag (read stream nil nil)))))
+
+(defun add-before-function-to-tag (before-function-source tag)
+  
+  (let ((test-tag (cond ((typep tag 'test-tag) tag)
+			((stringp tag) (gethash (string-upcase tag) *test-tags*))
+			(t (return-from add-before-function-to-tag nil)))))
+       
+    (setf (before-function-source test-tag)
+	  (cond ((null before-function-source) nil)
+		((and (listp before-function-source) (not (equal (car before-function-source) 'lambda)))
+		 (list 'lambda nil before-function-source))
+		((and (listp before-function-source) (equal (car before-function-source) 'lambda))
+		 before-function-source)
+		(t 
+		 (list 'lambda nil before-function-source))))
+
+    (setf (before-function-compiled-form test-tag)
+	  (eval (before-function-source test-tag)))
+
+    test-tag))
+
+(defun add-after-function-to-tag (after-function-source tag)  
+  (let ((test-tag (cond ((typep tag 'test-tag) tag)
+			((stringp tag) (gethash (string-upcase tag) *test-tags*))
+			(t (return-from add-after-function-to-tag nil)))))
+       
+    (setf (after-function-source test-tag)
+	  (cond ((null after-function-source) nil)
+		((and (listp after-function-source) (not (equal (car after-function-source) 'lambda)))
+		 (list 'lambda nil after-function-source))
+		((and (listp after-function-source) (equal (car after-function-source) 'lambda))
+		 after-function-source)
+		(t 
+		 (list 'lambda nil after-function-source))))
+
+    (setf (after-function-compiled-form test-tag)
+	  (eval (after-function-source test-tag)))
+
+    test-tag))
+
+(defun wrap-tag-in-functions (before-function after-function tag)
+  (let ((test-tag (cond ((typep tag 'test-tag) tag)
+			((stringp tag) (gethash (string-upcase tag) *test-tags*))
+			(t (return-from wrap-tag-in-functions nil)))))
+    (setf test-tag (add-before-function-to-tag before-function test-tag))
+    (setf test-tag (add-after-function-to-tag after-function tag))
+    
+    test-tag))

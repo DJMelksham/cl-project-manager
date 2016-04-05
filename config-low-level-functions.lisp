@@ -14,11 +14,12 @@
   (merge-pathnames config-name dir))
 
 (defun config-from-disk (dir &optional (config-name *module-config-name*))
-      (with-open-file (stream (merge-pathnames config-name dir)
-			      :direction :input
-			      :if-does-not-exist nil)
-			      
-	(read stream nil nil)))
+  (let ((*read-eval* nil))
+	(with-open-file (stream (merge-pathnames config-name dir)
+				:direction :input
+				:if-does-not-exist nil)
+	  
+	  (read stream nil nil))))
 
 (defun values-from-config-list (key config-list)
   (rest (first (member key config-list :key #'car :test #'equalp))))
