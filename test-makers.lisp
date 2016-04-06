@@ -1,3 +1,19 @@
+(defun register-test (test)
+
+  (if (gethash (id test) *test-ids*)
+	(error (concatenate 'string "A test with ID " (write-to-string (id test)) " is already registered. Change the ID before registering again, or deregister the other test first.")))
+
+  (if (gethash (string-upcase (name test)) *test-names*)
+	(error (concatenate 'string "A test named " (string-upcase (name test)) " is already registered. Change the nameof the test before registering again, or deregister the other test first.")))
+
+  (setf (gethash (id test) *test-ids*) test)
+  (setf (gethash (name test) *test-names*) test)
+  (loop for tag in (tags test)
+       with id = (id test)
+     do (hash-ext-array-insert tag id *test-tags-ids*))
+
+  test)
+
 (defun make-test (&key 
 		    id
 		    name
@@ -11,7 +27,8 @@
 		    run-time
 		    result
 		    before-function-source
-		    after-function-source)
+		    after-function-source
+		    test-dir)
   (let ((real-id (if (null id) (new-test-id) id))
 	(real-name nil)
 	(real-fod nil)
@@ -39,13 +56,13 @@
 		  (id (gethash real-name *test-names*)))
 	  (return-from make-test nil)))
 
-    ;;producing test file-name on disk 
+    ;;producing a potential file-name for the test on disk 
 	  
     (cond ((not file-on-disk) (setf real-fod (concatenate 'string real-name ".test")))
 	  ((and (stringp file-on-disk) (ends-with-p file-on-disk ".test"))
 	   (setf real-fod file-on-disk))
 	  (t (setf real-fod (concatenate 'string file-on-disk ".test"))))
-        
+    
     ;;producing test file description
     
     (if (or (not description)
@@ -134,7 +151,7 @@
     ;;register the test's tags?
   
 
-        (make-instance 'test
+      (register-test  (make-instance 'test
 		   :id real-id
 		   :name real-name
 		   :file-on-disk real-fod
@@ -150,7 +167,7 @@
 		   :before-function-source real-before-function-source
 		   :before-function-compiled-form real-compiled-before-function-form
 		   :after-function-source real-after-function-source
-		   :after-function-compiled-form real-compiled-after-function-form)))
+		   :after-function-compiled-form real-compiled-after-function-form))))
 
 
 
@@ -217,32 +234,6 @@
 
       config-structure)))
 
-(defun register-test (test)
-
-  (if (gethash (id test) *test-ids*)
-	(error (concatenate 'string "A test with ID " (write-to-string (id test)) " is already registered. Change the ID before registering again, or deregister the other test first.")))
-
-  (if (gethash (string-upcase (name test)) *test-names*)
-	(error (concatenate 'string "A test named " (string-upcase (name test)) " is already registered. Change the nameof the test before registering again, or deregister the other test first.")))
-
-  (setf (gethash (id test) *test-ids*) test)
-  (setf (gethash (name test) *test-names*) test)
-  (loop for tag in (tags test)
-       with id = (id test)
-     do (hash-ext-array-insert tag id *test-tag-ids*))
-  (setf (gethash (id test) *test-id-paths*) 
-	(cl-fad:merge-pathnames-as-file *active-module-path* *test-dir-name* (file-on-disk test)))
-
-  ;;need a function in here to add before and after tag functions
-  ;;or rather, I think just add it onto the tag-object and load the tag objects
-  ;;at a later date
-
-  (config-to-disk (cl-fad:merge-pathnames-as-directory *active-module-path* *test-dir-name*) 
-		  (test-to-config-structure test)
-		  (file-on-disk test))
-
-  test)
-
 (defun deregister-test (identifier)
   (let ((test (cond ((typep identifier 'test) identifier) 
 		    ((integerp identifier) (gethash identifier *test-ids*))
@@ -252,13 +243,13 @@
 		     (name name)
 		     (tags tags)
 		     (file-on-disk file-on-disk)) test
-
-      (delete-file (gethash id *test-id-paths*))
+      (if (null identifier)
+        (error "Test identifier cannot be null!"))
 
       (remhash id *test-ids*)
-    (remhash name *test-names*)
-    (loop for tag in tags
-	 do (hash-ext-array-remove tag id *test-tag-ids*))
-    (remhash id *test-id-paths*))
-
-    test))
+      (remhash name *test-names*)
+      (loop for tag in tags
+	 do (hash-ext-array-remove tag id *test-tags-ids*))
+      (remhash id *test-ids-paths*)
+  
+    test)))

@@ -18,7 +18,7 @@
     :documentation "The class-based lookup table for expectation functions ")
    (id
     :initarg :id
-    :initform (new-test-id)
+    :initform (error "A test needs an integer test-id")
     :type 'integer
     :accessor id
     :documentation "A unique integer identifying each test")
