@@ -9,8 +9,7 @@
   (setf (gethash (id test) *test-ids*) test)
   (setf (gethash (name test) *test-names*) test)
   (loop for tag in (tags test)
-       with id = (id test)
-     do (hash-ext-array-insert tag id *test-tags-ids*))
+     do (hash-ext-array-insert tag test *test-tags*))
 
   test)
 
@@ -27,8 +26,7 @@
 		    run-time
 		    result
 		    before-function-source
-		    after-function-source
-		    test-dir)
+		    after-function-source)
   (let ((real-id (if (null id) (new-test-id) id))
 	(real-name nil)
 	(real-fod nil)
@@ -92,10 +90,16 @@
     
     ;;producing test tags
     
-    (if (or (not (listp tags))
-	    (notevery #'stringp tags))
-	(setf real-tags nil)
-	(setf real-tags (remove-duplicates (map 'list #'string-upcase tags) :test #'equal)))
+    (cond ((and (not (listp tags))
+		(not (stringp tags))
+		(notevery #'stringp tags)) 
+	   (setf real-tags nil))
+	  ((stringp tags) 
+	   (setf real-tags (list (string-upcase tags))))
+	  ((typep tags 'sequence)
+	   (setf real-tags 
+		 (remove-duplicates (map 'list #'string-upcase tags) :test #'equalp)))
+	  (t (setf real-tags nil)))
     
     ;;producing test source
     (cond ((null source)
@@ -146,10 +150,6 @@
     (if (null real-after-function-source)
 	(setf real-compiled-after-function-form *test-empty-function*)
 	(setf real-compiled-after-function-form (eval real-after-function-source)))
-    
-
-    ;;register the test's tags?
-  
 
       (register-test  (make-instance 'test
 		   :id real-id
@@ -168,6 +168,7 @@
 		   :before-function-compiled-form real-compiled-before-function-form
 		   :after-function-source real-after-function-source
 		   :after-function-compiled-form real-compiled-after-function-form))))
+      
 
 
 
@@ -249,7 +250,7 @@
       (remhash id *test-ids*)
       (remhash name *test-names*)
       (loop for tag in tags
-	 do (hash-ext-array-remove tag id *test-tags-ids*))
+	 do (hash-ext-array-remove tag id *test-tags*))
       (remhash id *test-ids-paths*)
   
     test)))

@@ -125,7 +125,7 @@
 		       (result result)
 		       (before-function-source before-function-source)
 		       (after-function-source after-function-source)) object
-	(format stream "~& TEST ID: ~a~& NAME: ~a~& FILE-ON-DISK: ~a~& TEST DESCRIPTION: ~a~& EXPECTATION TYPE: ~a~& TAGS: ~a~& TEST EXPECTED VALUE: ~a~&"		
+	(format stream "~& TEST ID: ~a~& NAME: ~a~& FILE-ON-DISK: ~a~& TEST DESCRIPTION: ~a~& EXPECTATION TYPE: ~a~& TAGS: ~a~& TEST EXPECTED VALUE: ~a"		
 		id name file-on-disk description expectation tags expected-value)
 
 	(format stream "~& TEST SOURCE: ")

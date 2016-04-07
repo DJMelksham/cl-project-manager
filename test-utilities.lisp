@@ -1,8 +1,7 @@
 (defun hash-ext-array-insert (key value hash)
   (if (nth-value 1 (gethash key hash))
       (vector-push-extend value (gethash key hash))
-      (setf (gethash key hash) (make-array 1 
-					   :element-type 'integer 
+      (setf (gethash key hash) (make-array 1  
 					   :initial-element value
 					   :adjustable t
 					   :fill-pointer 1)))
@@ -38,6 +37,17 @@
 	((typep test-identifier 'test)
 	 test-identifier)
 	(t nil)))
+
+(defun tag-cond (tag-identifier)
+  (cond ((and (not (listp tag-identifier))
+	      (not (stringp tag-identifier))
+	      (notevery #'stringp tag-identifier)) 
+	   nil)
+	  ((stringp tag-identifier) 
+	   (list (string-upcase tag-identifier)))
+	  ((typep tag-identifier 'sequence) 
+	   (remove-duplicates (map 'list #'string-upcase tag-identifier) :test #'equalp))
+	  (t nil)))
 	      
 (defun fetch-tests (test-identifier)
   (let* ((result nil))
@@ -49,6 +59,24 @@
 	    (typep test-identifier 'string))
 	(setf result (make-array 1 :initial-element (test-cond test-identifier)))
 	(setf result (map 'vector #'test-cond test-identifier)))
-    result))
+    (remove-duplicates result :test #'eq)))
     
-  
+(defun fetch-tests-from-tags (tag-identifiers)
+  (let ((result (loop for tags in (tag-cond tag-identifiers)
+		   unless (null (gethash tags *test-tags*))
+		   collect (gethash tags *test-tags*))))
+
+    (remove-duplicates (apply #'concatenate 'vector result) :test #'eq)))
+
+(defun combine-test-sequences (&rest test-sequences)
+ (remove nil 
+	 (remove-duplicates 
+	  (apply #'concatenate 'vector 
+		 (map 'list #'fetch-tests test-sequences)) 
+	  :test #'eq)))
+
+(defun run-tests (tests)
+  (map 'vector #'run-test (fetch-tests tests)))
+
+(defun run-tags (tags)
+  (map 'vector #'run-test (fetch-tests-from-tags tags)))
