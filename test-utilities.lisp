@@ -80,3 +80,25 @@
 
 (defun run-tags (tags)
   (map 'vector #'run-test (fetch-tests-from-tags tags)))
+
+(defun tests-if (predicate-func test-sequence)
+  (remove-if-not predicate-func (fetch-tests test-sequence)))
+
+(defun tests-if-not (predicate-func test-sequence)
+  (remove-if predicate-func (fetch-tests test-sequence)))
+
+(defun map-tests (func test-sequence &optional (result-type 'vector))
+  (map result-type func (fetch-tests test-sequence)))
+
+(defun set-low-verbose ()
+(setf *test-print-verbosity* 'low))
+
+(defun set-high-verbose ()
+(setf *test-print-verbosity* 'high))
+
+(defun set-medium-verbose ()
+(setf *test-print-verbosity* 'medium))
+
+(defun all-tests ()
+  (map 'vector #'identity (loop for tests being the hash-values in *test-ids*
+			     collect tests)))
