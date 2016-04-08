@@ -64,6 +64,11 @@
     :type 'function
     :accessor compiled-form
     :documentation "The compiled-form of the function applied when the test is called")
+   (re-evaluate
+    :initarg :re-evaluate
+    :accessor re-evaluate
+    :initform NIL
+    :documentation "A T/NIL flag that determines whether a test should always re-evaluate its source code before running.  Helpful/necessary for testing code including user-defined macros.  However, comes with a performance hit.")
    (expected-value
     :initarg :expected-value
     :initform (error "A test object must include an expected value for the result of the test")
@@ -110,7 +115,7 @@
     :documentation "A compiled zero argument function that will be funcall'd after the test")))
 
 (defmethod print-object ((object test) stream)
-    (print-unreadable-object (object stream :type t)
+    (print-unreadable-object (object stream)
       (with-accessors ((id id)
 		       (name name)
 		       (file-on-disk file-on-disk)
@@ -121,17 +126,28 @@
 		       (expected-value expected-value)
 		       (run-value run-value)
 		       (run-time run-time)
+		       (re-evaluate re-evaluate)
 		       (status status)
 		       (result result)
 		       (before-function-source before-function-source)
 		       (after-function-source after-function-source)) object
-	(format stream "~& TEST ID: ~a~& NAME: ~a~& FILE-ON-DISK: ~a~& TEST DESCRIPTION: ~a~& EXPECTATION TYPE: ~a~& TAGS: ~a~& TEST EXPECTED VALUE: ~a"		
-		id name file-on-disk description expectation tags expected-value)
 
-	(format stream "~& TEST SOURCE: ")
-	(format stream "~{~a~^~&~}" (cddr source))
-	(if run-value (format stream "~& LAST RUN VALUE OF TEST: ~a" run-value))
-	(if run-time (format stream "~& RUN-TIME IN SECONDS: ~a" run-time))
-	(if result (format stream "~& TEST PASSED ON LAST RUN?: ~a" result))
-	(if before-function-source (format stream "~& SOURCE OF FUNCTION THAT RUNS BEFORE THE TEST: ~a" before-function-source))
-	(if after-function-source (format stream "~& SOURCE OF FUNCTION THAT RUNS AFTER THE TEST: ~a" after-function-source)))))
+	(cond ((eq *print-verbosity* 'high)
+	       (progn
+		 (format stream "-------------------->~& ID: ~a~& NAME: ~a~& DESCRIPTION: ~a~& TAGS: ~a~& RE-EVALUATE EACH RUN: ~a"		id name description tags re-evaluate)
+		 (format stream "~& SOURCE: ")
+		 (format stream "~{~a~^~&~}" (cddr source))
+		 (format stream "~& EXPECTATION: ~a" expectation)
+		 (format stream "~& EXPECTED VALUE: ~a" expected-value)
+		 (if run-value (format stream "~& RUN VALUE: ~a" run-value))
+		 (format stream "~& TEST PASSED: ~a" result)
+		 (if run-time (format stream "~& RUN-TIME IN SECONDS: ~a" run-time))
+		 (if before-function-source (format stream "~& FUNCTION THAT RUNS BEFORE THE TEST: ~a" before-function-source))
+		 (if after-function-source (format stream "~&FUNCTION THAT RUNS AFTER THE TEST: ~a" after-function-source))))
+	      ((eq *print-verbosity* 'medium) 
+	       (progn
+		 (format stream "---------------------~& ***   ~a   *** ~& ID: ~a | NAME: ~a " (if result "PASSED!" "FAILED!") id name))
+		 (format stream "~& SUMMARY: (~a ~a ~a)" expectation expected-value run-value))
+	      ((eq *print-verbosity* 'low)
+	       (format stream " TEST ~a ~a " id (if result "PASSED" "FAILED"))))))) 
+	    

@@ -1,4 +1,4 @@
-(defun run-test (test)
+(defun run-test (test &key (re-evaluate 'auto))
   
   (let ((test-time-start 0)
 	(test-time-stop 0))

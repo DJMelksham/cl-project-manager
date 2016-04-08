@@ -90,15 +90,21 @@
 (defun map-tests (func test-sequence &optional (result-type 'vector))
   (map result-type func (fetch-tests test-sequence)))
 
-(defun set-low-verbose ()
-(setf *test-print-verbosity* 'low))
+(defun low-verbosity ()
+  (setf *print-verbosity* 'low))
 
-(defun set-high-verbose ()
-(setf *test-print-verbosity* 'high))
+(defun high-verbosity ()
+  (setf *print-verbosity* 'high))
 
-(defun set-medium-verbose ()
-(setf *test-print-verbosity* 'medium))
+(defun medium-verbosity ()
+  (setf *print-verbosity* 'medium))
 
-(defun all-tests ()
+(defun all-tests (&key (verbosity *print-verbosity*))
+ (let ((*print-verbosity* verbosity)) 
   (map 'vector #'identity (loop for tests being the hash-values in *test-ids*
-			     collect tests)))
+			     collect tests))))
+
+(defun details-tests (test-sequence)
+  (let ((*print-verbosity* 'high))
+    (fetch-tests test-sequence))
+

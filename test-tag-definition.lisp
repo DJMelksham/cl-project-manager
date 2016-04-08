@@ -1,57 +1,64 @@
-(defclass test-tag ()
+(defclass context ()
   ((name
     :initarg :name
-    :initform (error "A tag must be created with a name")
+    :initform (error "A context must be created with a name")
     :type 'string
     :accessor name
-    :documentation "The name of the test-tag")
+    :documentation "The name of the context")
    (description
     :initarg :description
     :initform "No description available"
     :type 'string
     :accessor description
-    :documentation "A long form textual description of the tag and tests marked with it.")
+    :documentation "A long form textual description of the test context.")
+   (re-evaluate
+    :initarg :re-evaluate
+    :accessor re-evaluate
+    :initform NIL
+    :documentation "A T/NIL flag that determines whether a context should always re-evaluate its source code before running.  Helpful/necessary for testing code including user-defined macros.  However, comes with a performance hit.")
    (before-function-source
     :initarg :before-function-source
     :initform nil
     :type 'list
     :accessor before-function-source
-    :documentation "Source for a zero argument function that will be funcall'd before any tests accessed via this tag are run.")
+    :documentation "Source for a zero argument function that will be funcall'd before any tests run with this context.")
    (before-function-compiled-form
     :initarg :before-function-compiled-form
     :initform (lambda () nil)
     :type 'function
     :accessor before-function-compiled-form
-    :documentation "A compiled zero argument function that will be funcall'd  before any tests accessed via this tag are run.")
+    :documentation "A compiled zero argument function that will be funcall'd  before any tests run within this context.")
    (after-function-source
     :initarg :after-function-source
     :initform nil
     :type 'list
     :accessor after-function-source
-    :documentation "Source for a zero argument function that will be funcall'd before any tests accessed via this tag are run.")
+    :documentation "Source for a zero argument function that will be funcall'd after any tests run with this context.")
    (after-function-compiled-form
     :initarg :after-function-compiled-form
     :initform (lambda () nil)
     :type 'function
     :accessor after-function-compiled-form
-    :documentation "A compiled zero argument function that will be funcall'd before any tests accessed via this tag are run")))
+    :documentation "A compiled zero argument function that will be funcall'd after any tests run within this context")))
 
-(defmethod print-object ((object test-tag) stream)
+(defmethod print-object ((object context) stream)
     (print-unreadable-object (object stream :type t)
       (with-accessors ((name name)
 		       (description description)
+		       (re-evaluate re-evaluate)
 		       (before-function-source before-function-source)
 		       (after-function-source after-function-source)) object
-	(format stream "~& NAME: ~a~& DESCRIPTION: ~a~&"		
-		name description)
-	(if before-function-source (format stream "~& SOURCE OF FUNCTION TO RUN BEFORE TAG: ~a"  before-function-source))
-	(if after-function-source (format stream "~& SOURCE OF FUNCTION TO RUN AFTER TAG: ~a" after-function-source)))))
+	(format stream "~& NAME: ~a~& DESCRIPTION: ~a~& RE-EVALUATE EACH RUN: ~a~&"		
+		name description re-evaluate)
+	(if before-function-source (format stream "~& SOURCE OF FUNCTION TO SETUP CONTEXT: ~a"  before-function-source))
+	(if after-function-source (format stream "~& SOURCE OF FUNCTION TO TEAR DOWN CONTEXT: ~a" after-function-source)))))
 
-(defun make-test-tag (&key
-			name
-			description
-			before-function-source
-			after-function-source)
+(defun make-context (&key
+		       name
+		       description
+		       re-evaluate
+		       before-function-source
+		       after-function-source)
 
   (let ((real-name nil)
 	(real-desc nil)
@@ -103,9 +110,10 @@
 	(setf real-compiled-after-function-form *test-empty-function*)
 	(setf real-compiled-after-function-form (eval real-after-function-source)))
 
-	(setf final-tag (make-instance 'test-tag
+	(setf final-tag (make-instance 'context
 				       :name real-name
-				       :description real-desc 
+				       :description real-desc
+				       :re-evaluate re-evaluate
 				       :before-function-source real-before-function-source
 				       :before-function-compiled-form real-compiled-before-function-form
 				       :after-function-source real-after-function-source
