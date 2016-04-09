@@ -31,7 +31,7 @@
 	  ((zerop num-failed)
 	   (values 100.00 0.00))
 	  (t (values (float (* 100 (/ num-passed (+ num-passed num-failed))))
-		     (float (* 100 (/ num-failed (+ num-passed num-failed))))))))))
+		     (float (* 100 (/ num-failed (+ num-passed num-failed)))))))))
 
 (defun stat-ratio-passed (test-identifiers)
   (multiple-value-bind (num-passed num-failed)

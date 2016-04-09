@@ -70,6 +70,12 @@
 
     (remove-duplicates (apply #'concatenate 'vector result) :test #'eq)))
 
+(defun deregister-tests (test-sequence)
+  (map 'vector #'identity (loop for test across (fetch-tests test-sequence)
+			     do (if (typep test 'test) 
+				    (deregister-test (id test)))
+			     collect test)))
+
 (defun combine-test-sequences (&rest test-sequences)
  (remove nil 
 	 (remove-duplicates 

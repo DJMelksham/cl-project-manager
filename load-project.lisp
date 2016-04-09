@@ -20,6 +20,7 @@
 (relative-load "test-runner.lisp")
 (relative-load "test-utilities.lisp")
 (relative-load "test-makers.lisp")
+(relative-load "test-stats.lisp")
 
 ;(relative-load "test-functions.lisp")
 ;(relative-load "test-tag-definition.lisp")

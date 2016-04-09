@@ -179,81 +179,20 @@
 		   :after-function-source real-after-function-source
 		   :after-function-compiled-form real-compiled-after-function-form))))
 
-(defun config-structure-to-test (config-structure)
-  (let ((id (values-from-config-list 'ID config-structure))
-	(name (values-from-config-list 'NAME config-structure))
-	(file-on-disk (values-from-config-list 'FILE-ON-DISK config-structure))
-	(description (values-from-config-list 'DESCRIPTION config-structure))
-	(expectation (values-from-config-list 'expectation config-structure))
-	(tags (values-from-config-list 'TAGS config-structure))
-	(source (values-from-config-list 'SOURCE config-structure))
-	(expected-value (values-from-config-list 'EXPECTED-VALUE config-structure))
-	(run-value (values-from-config-list 'RUN-VALUE config-structure))
-	(run-time (values-from-config-list 'RUN-TIME config-structure))
-	(result (values-from-config-list 'RESULT config-structure))
-	(before-function-source (values-from-config-list 'BEFORE-FUNCTION-SOURCE config-structure))
-	(after-function-source (values-from-config-list 'AFTER-FUNCTION-SOURCE config-structure)))
-
-	(make-test  
-	 :id (car id) 
-	 :name (car name)
-	 :file-on-disk (car file-on-disk)
-	 :description (car description)
-	 :expectation (car expectation)
-	 :tags (car tags)
-	 :source (car source)
-	 :expected-value (car expected-value)
-	 :run-value (car run-value)
-	 :run-time (car run-time)
-	 :result (car result)
-	 :before-function-source (car before-function-source)
-	 :after-function-source (car after-function-source))))
-
-(defun test-to-config-structure (test)
-  (let ((config-structure ()))
-
-    (with-accessors ((id id)
-		     (name name)
-		     (file-on-disk file-on-disk)
-		     (description description)
-		     (expectation expectation)
-		     (tags tags)
-		     (source source)
-		     (expected-value expected-value)
-		     (run-value run-value)
-		     (run-time run-time)
-		     (result result)
-		     (before-function-source before-function-source)
-		     (after-function-source after-function-source)) test
-		     
-      (setf config-structure (add-value-to-config-key after-function-source 'after-function-source config-structure))
-      (setf config-structure (add-value-to-config-key before-function-source 'before-function-source config-structure))
-      (setf config-structure (add-value-to-config-key expected-value 'expected-value config-structure))
-      (setf config-structure (add-value-to-config-key result 'result config-structure))
-      (setf config-structure (add-value-to-config-key run-time 'run-time config-structure))
-      (setf config-structure (add-value-to-config-key run-value 'run-value config-structure))
-      (setf config-structure (add-value-to-config-key source 'source config-structure))
-      (setf config-structure (add-value-to-config-key tags 'tags config-structure))
-      (setf config-structure (add-value-to-config-key expectation 'expectation config-structure))
-      (setf config-structure (add-value-to-config-key description 'description config-structure))
-      (setf config-structure (add-value-to-config-key file-on-disk 'file-on-disk config-structure))
-      (setf config-structure (add-value-to-config-key name 'name config-structure))
-      (setf config-structure (add-value-to-config-key id 'id config-structure))
-
-      config-structure)))
-
 (defun deregister-test (identifier)
   (let ((test (cond ((typep identifier 'test) identifier) 
 		    ((integerp identifier) (gethash identifier *test-ids*))
 		    ((stringp identifier) (gethash (string-upcase identifier) *test-names*))
 		    (t (return-from deregister-test nil)))))
+
+    (if (null test)
+	(return-from deregister-test nil))
+    
     (with-accessors ((id id)
 		     (name name)
 		     (tags tags)
 		     (file-on-disk file-on-disk)) test
-      (if (null identifier)
-        (error "Test identifier cannot be null!"))
-
+      
       (remhash id *test-ids*)
       (remhash name *test-names*)
       (loop for tag in tags
