@@ -149,5 +149,5 @@
 		 (format stream "---------------------~& ***   ~a   *** ~& ID: ~a | NAME: ~a " (if result "PASSED!" "FAILED!") id name))
 		 (format stream "~& SUMMARY: (~a ~a ~a)" expectation expected-value run-value))
 	      ((eq *print-verbosity* 'low)
-	       (format stream " TEST ~a ~a " id (if result "PASSED" "FAILED"))))))) 
+	       (format stream " TEST ~a ~a " id (if result "PASS" "FAIL"))))))) 
 	    

@@ -90,6 +90,21 @@
 (defun map-tests (func test-sequence &optional (result-type 'vector))
   (map result-type func (fetch-tests test-sequence)))
 
+(defun failed-tests (test-sequence)
+  (tests-if (lambda (x) (equal (result x) nil)) test-sequence))
+
+(defun passed-tests (test-sequence)
+  (tests-if (lambda (x) (equal (result x) t)) test-sequence))
+
+(defun fail-tests (test-sequence)
+  (failed-tests test-sequence))
+(defun failing-tests (test-sequence)
+  (failed-tests test-sequence))
+(defun pass-tests (test-sequence)
+  (passed-tests test-sequence))
+(defun passing-tests (test-sequence)
+  (passed-tests test-sequence))
+
 (defun low-verbosity ()
   (setf *print-verbosity* 'low))
 
@@ -104,7 +119,40 @@
   (map 'vector #'identity (loop for tests being the hash-values in *test-ids*
 			     collect tests))))
 
-(defun details-tests (test-sequence)
+(defun detail-tests (test-sequence)
   (let ((*print-verbosity* 'high))
-    (fetch-tests test-sequence))
+    (fetch-tests test-sequence)))
 
+(defun print-results (&optional test-sequence (stream t))
+  
+  (let ((tests (fetch-tests (if test-sequence
+				test-sequence
+				(all-tests)))))
+    (loop 
+       for test across tests
+       for result = (result test) then (result test)
+       for id = (id test) then (id test)
+       for position = 1 then (incf position)
+
+       do (if (equal result t)
+	      (format stream ".")
+	      (progn (setf position 0)
+		     (format stream "~&~a~&" (id test))))
+       do (if (> position 50)
+	      (progn
+		(setf position 0)
+		(format stream "~&"))))
+    
+    tests))
+
+
+(defmacro with-gensyms (syms &body body)
+  `(let ,(loop for s in syms collect `(,s (gensym)))
+    ,@body))
+
+(defmacro once-only ((&rest names) &body body)
+  (let ((gensyms (loop for n in names collect (gensym))))
+    `(let (,@(loop for g in gensyms collect `(,g (gensym))))
+      `(let (,,@(loop for g in gensyms for n in names collect ``(,,g ,,n)))
+        ,(let (,@(loop for n in names for g in gensyms collect `(,n ,g)))
+           ,@body)))))
