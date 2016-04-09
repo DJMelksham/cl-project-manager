@@ -15,6 +15,8 @@
 	    (remhash key hash)
 	    T))))
 
+
+
 (let ((x 0))
   (defun new-test-id ()
     (if (boundp '*test-ids*)
@@ -75,8 +77,11 @@
 		 (map 'list #'fetch-tests test-sequences)) 
 	  :test #'eq)))
 
-(defun run-tests (tests)
-  (map 'vector #'run-test (fetch-tests tests)))
+(defun run-tests (test-sequence &key (re-evaluate 'auto))
+  (cond ((eq re-evaluate 'auto) (map 'vector #'run-test (fetch-tests test-sequence)))
+	((eq re-evaluate t) (map 'vector #'run-test-re-evaluate (fetch-tests test-sequence)))
+	((eq re-evaluate nil) (map 'vector #'run-test-no-evaluate (fetch-tests test-sequence)))
+	(t (map 'vector #'run-test (fetch-tests test-sequence)))))
 
 (defun run-tags (tags)
   (map 'vector #'run-test (fetch-tests-from-tags tags)))
@@ -87,7 +92,7 @@
 (defun tests-if-not (predicate-func test-sequence)
   (remove-if predicate-func (fetch-tests test-sequence)))
 
-(defun map-tests (func test-sequence &optional (result-type 'vector))
+(defun map-tests (func test-sequence &key (result-type 'vector))
   (map result-type func (fetch-tests test-sequence)))
 
 (defun failed-tests (test-sequence)
@@ -96,12 +101,8 @@
 (defun passed-tests (test-sequence)
   (tests-if (lambda (x) (equal (result x) t)) test-sequence))
 
-(defun fail-tests (test-sequence)
-  (failed-tests test-sequence))
 (defun failing-tests (test-sequence)
   (failed-tests test-sequence))
-(defun pass-tests (test-sequence)
-  (passed-tests test-sequence))
 (defun passing-tests (test-sequence)
   (passed-tests test-sequence))
 

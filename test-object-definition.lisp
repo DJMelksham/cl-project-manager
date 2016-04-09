@@ -1,6 +1,5 @@
 (defclass test ()
-  (
-   (expectation-table
+  ((expectation-table
     :initform (let ((ex-table (make-hash-table :test #'equalp :size 8)))
 		(setf (gethash "EQ" ex-table) #'eq
 		      (gethash "EQL" ex-table) #'eql
@@ -10,7 +9,7 @@
 		      (gethash "NOTNULL" ex-table) (lambda (x) (NOT (NULL x)))
 		      (gethash "T" ex-table) (lambda (x) (eq T x))
 		      (gethash "CONDITION-OF-TYPE" ex-table) (lambda (type x)
-								     (typep x type)))
+							       (typep x type)))
 		ex-table)
     :type 'hash-table
     :accessor expectation-table
@@ -114,8 +113,58 @@
     :accessor after-function-compiled-form
     :documentation "A compiled zero argument function that will be funcall'd after the test")))
 
+(defgeneric serialise (object pathname)
+  (:documentation "Serialse the given object to disk"))
+
+(defmethod serialise ((object test) pathname)
+  (let ((local-pathname (if (cl-fad:directory-pathname-p pathname)
+			    (cl-fad:merge-pathnames-as-file pathname (file-on-disk object))
+			    pathname)))
+    
+    (with-open-file (stream local-pathname
+			    :direction :output
+			    :if-exists :supersede
+			    :if-does-not-exist :create)
+    (print (list (cons 'ID (id object))
+		 (cons 'NAME (name object))
+		 (cons 'FILE-ON-DISK (concatenate 'string 
+						  (pathname-name local-pathname)
+						  (pathname-type local-pathname)))
+		 (cons 'DESCRIPTION (description object))
+		 (cons 'EXPECTATION (expectation object))
+		 (cons 'TAGS (tags object))
+		 (cons 'SOURCE (source object))
+		 (cons 'RE-EVALUATE (re-evaluate object))
+		 (cons 'EXPECTED-VALUE (expected-value object))
+		 (cons 'RUN-VALUE (run-value object))
+		 (cons 'RUN-TIME (run-time object))
+		 (cons 'RESULT (result object))
+		 (cons 'BEFORE-FUNCTION-SOURCE (before-function-source object))
+		 (cons 'AFTER-FUNCTION-SOURCE (after-function-source object))) stream))
+    
+    local-pathname))
+
+(defun load-test (pathname)
+  (with-open-file (stream pathname
+			  :direction :input
+			  :if-does-not-exist :error)
+    (let ((a-list (read stream)))
+      (make-test :id (cdr (assoc 'ID a-list))
+		 :name (cdr (assoc 'NAME a-list))
+		 :file-on-disk (cdr (assoc 'FILE-ON-DISK a-list))
+		 :description (cdr (assoc 'DESCRIPTION a-list))
+		 :expectation (cdr (assoc 'EXPECTATION a-list))
+		 :tags (cdr (assoc 'TAGS a-list))
+		 :source (cdr (assoc 'SOURCE a-list))
+		 :expected-value (cdr (assoc 'EXPECTED-VALUE a-list))
+		 :run-value (cdr (assoc 'RUN-VALUE a-list))
+		 :run-time (cdr (assoc 'RUN-TIME a-list))
+		 :result (cdr (assoc 'RESULT a-list))
+		 :before-function-source (cdr (assoc 'BEFORE-FUNCTION-SOURCE a-list))
+		 :after-function-source (cdr (assoc 'AFTER-FUNCTION-source a-list))))))
+
 (defmethod print-object ((object test) stream)
-    (print-unreadable-object (object stream)
+  (print-unreadable-object (object stream)
       (with-accessors ((id id)
 		       (name name)
 		       (file-on-disk file-on-disk)
@@ -143,11 +192,11 @@
 		 (format stream "~& TEST PASSED: ~a" result)
 		 (if run-time (format stream "~& RUN-TIME IN SECONDS: ~a" run-time))
 		 (if before-function-source (format stream "~& FUNCTION THAT RUNS BEFORE THE TEST: ~a" before-function-source))
-		 (if after-function-source (format stream "~&FUNCTION THAT RUNS AFTER THE TEST: ~a" after-function-source))))
+		 (if after-function-source (format stream "~& FUNCTION THAT RUNS AFTER THE TEST: ~a" after-function-source))))
 	      ((eq *print-verbosity* 'medium) 
 	       (progn
 		 (format stream "---------------------~& ***   ~a   *** ~& ID: ~a | NAME: ~a " (if result "PASSED!" "FAILED!") id name))
 		 (format stream "~& SUMMARY: (~a ~a ~a)" expectation expected-value run-value))
 	      ((eq *print-verbosity* 'low)
-	       (format stream " TEST ~a ~a " id (if result "PASS" "FAIL"))))))) 
+	       (format stream " TEST ~a ~a " id (if result "PASS" "FAIL")))))))
 	    

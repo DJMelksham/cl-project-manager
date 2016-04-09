@@ -20,6 +20,7 @@
 		    description
 		    expectation
 		    tags
+		    re-evaluate
 		    source
 		    expected-value
 		    run-value
@@ -33,6 +34,7 @@
 	(real-desc nil)
 	(real-exp nil)
 	(real-tags nil)
+	(real-re-evaluate nil)
 	(real-source nil)
 	(real-compiled-form nil)
 	(real-expected-value nil)
@@ -101,6 +103,11 @@
 		 (remove-duplicates (map 'list #'string-upcase tags) :test #'equalp)))
 	  (t (setf real-tags nil)))
     
+    ;;producing re-evaluate
+    (cond ((eq re-evaluate t) (setf real-re-evaluate t))
+	  ((equal re-evaluate nil) (setf real-re-evaluate nil))
+	  (t (error "Re-evaluate can be set to either NIL or T")))
+
     ;;producing test source
     (cond ((null source)
 	   (progn
@@ -125,7 +132,7 @@
     
     ;;producing test before-function-source
     (cond ((null before-function-source)
-	   (setf real-before-function-source nil))
+	   (setf real-before-function-source '(lambda () nil)))
 	  ((and (listp before-function-source) (not (equal (car before-function-source) 'lambda)))
 	   (setf real-before-function-source (list 'lambda nil before-function-source)))
 	  ((and (listp before-function-source) (equal (car before-function-source) 'lambda))
@@ -133,13 +140,14 @@
 	  (t 
 	   (setf real-before-function-source (list 'lambda nil before-function-source))))
     ;;producing test before-function-compiled
-    (if (null real-before-function-source)
+    (if (or (null real-before-function-source)
+	    (equal real-before-function-source '(lambda () nil)))
 	(setf real-compiled-before-function-form *test-empty-function*)
 	(setf real-compiled-before-function-form (eval real-before-function-source)))
     
     ;;producing test after-function-source
     (cond ((null after-function-source)
-	   (setf real-after-function-source nil))
+	   (setf real-after-function-source '(lambda () nil)))
 	  ((and (listp after-function-source) (not (equal (car after-function-source) 'lambda)))
 	   (setf real-after-function-source (list 'lambda nil after-function-source)))
 	  ((and (listp after-function-source) (equal (car after-function-source) 'lambda))
@@ -147,7 +155,8 @@
 	  (t 
 	   (setf real-after-function-source (list 'lambda nil after-function-source))))
     ;;producing test after-function-compiled
-    (if (null real-after-function-source)
+    (if (or (null real-after-function-source)
+	    (equal real-after-function-source '(lambda () nil)))
 	(setf real-compiled-after-function-form *test-empty-function*)
 	(setf real-compiled-after-function-form (eval real-after-function-source)))
 
@@ -157,6 +166,7 @@
 		   :file-on-disk real-fod
 		   :description real-desc
 		   :expectation real-exp
+		   :re-evaluate real-re-evaluate
 		   :tags real-tags
 		   :source real-source
 		   :compiled-form real-compiled-form
@@ -168,9 +178,6 @@
 		   :before-function-compiled-form real-compiled-before-function-form
 		   :after-function-source real-after-function-source
 		   :after-function-compiled-form real-compiled-after-function-form))))
-      
-
-
 
 (defun config-structure-to-test (config-structure)
   (let ((id (values-from-config-list 'ID config-structure))
