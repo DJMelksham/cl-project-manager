@@ -1,18 +1,3 @@
-(defun register-test (test)
-
-  (if (gethash (id test) *test-ids*)
-	(error (concatenate 'string "A test with ID " (write-to-string (id test)) " is already registered. Change the ID before registering again, or deregister the other test first.")))
-
-  (if (gethash (string-upcase (name test)) *test-names*)
-	(error (concatenate 'string "A test named " (string-upcase (name test)) " is already registered. Change the nameof the test before registering again, or deregister the other test first.")))
-
-  (setf (gethash (id test) *test-ids*) test)
-  (setf (gethash (name test) *test-names*) test)
-  (loop for tag in (tags test)
-     do (hash-ext-array-insert tag test *test-tags*))
-
-  test)
-
 (defun make-test (&key 
 		    id
 		    name
@@ -179,24 +164,4 @@
 		   :after-function-source real-after-function-source
 		   :after-function-compiled-form real-compiled-after-function-form))))
 
-(defun deregister-test (identifier)
-  (let ((test (cond ((typep identifier 'test) identifier) 
-		    ((integerp identifier) (gethash identifier *test-ids*))
-		    ((stringp identifier) (gethash (string-upcase identifier) *test-names*))
-		    (t (return-from deregister-test nil)))))
 
-    (if (null test)
-	(return-from deregister-test nil))
-    
-    (with-accessors ((id id)
-		     (name name)
-		     (tags tags)
-		     (file-on-disk file-on-disk)) test
-      
-      (remhash id *test-ids*)
-      (remhash name *test-names*)
-      (loop for tag in tags
-	 do (hash-ext-array-remove tag id *test-tags*))
-      (remhash id *test-ids-paths*)
-  
-    test)))

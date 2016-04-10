@@ -113,10 +113,10 @@
     :accessor after-function-compiled-form
     :documentation "A compiled zero argument function that will be funcall'd after the test")))
 
-(defgeneric serialise (object pathname)
+(defgeneric serialise (pathname object)
   (:documentation "Serialse the given object to disk"))
 
-(defmethod serialise ((object test) pathname)
+(defmethod serialise (pathname (object test))
   (let ((local-pathname (if (cl-fad:directory-pathname-p pathname)
 			    (cl-fad:merge-pathnames-as-file pathname (file-on-disk object))
 			    pathname)))
@@ -125,8 +125,7 @@
 			    :direction :output
 			    :if-exists :supersede
 			    :if-does-not-exist :create)
-    (print (list (cons 'ID (id object))
-		 (cons 'NAME (name object))
+    (print (list (cons 'NAME (name object))
 		 (cons 'FILE-ON-DISK (concatenate 'string 
 						  (pathname-name local-pathname)
 						  (pathname-type local-pathname)))
@@ -149,8 +148,7 @@
 			  :direction :input
 			  :if-does-not-exist :error)
     (let ((a-list (read stream)))
-      (make-test :id (cdr (assoc 'ID a-list))
-		 :name (cdr (assoc 'NAME a-list))
+      (make-test :name (cdr (assoc 'NAME a-list))
 		 :file-on-disk (cdr (assoc 'FILE-ON-DISK a-list))
 		 :description (cdr (assoc 'DESCRIPTION a-list))
 		 :expectation (cdr (assoc 'EXPECTATION a-list))

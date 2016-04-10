@@ -15,7 +15,45 @@
 	    (remhash key hash)
 	    T))))
 
+(defun register-test (test)
 
+  (if (not (typep test 'test))
+      (return-from register-test nil))
+
+  (if (gethash (id test) *test-ids*)
+	(error (concatenate 'string "A test with ID " (write-to-string (id test)) " is already registered. Change the ID before registering again, or deregister the other test first.")))
+
+  (if (gethash (string-upcase (name test)) *test-names*)
+	(error (concatenate 'string "A test named " (string-upcase (name test)) " is already registered. Change the nameof the test before registering again, or deregister the other test first.")))
+
+  (setf (gethash (id test) *test-ids*) test)
+  (setf (gethash (name test) *test-names*) test)
+  (loop for tag in (tags test)
+     do (hash-ext-array-insert tag test *test-tags*))
+
+  test)
+
+(defun deregister-test (identifier)
+  (let ((test (cond ((typep identifier 'test) identifier) 
+		    ((integerp identifier) (gethash identifier *test-ids*))
+		    ((stringp identifier) (gethash (string-upcase identifier) *test-names*))
+		    (t (return-from deregister-test nil)))))
+
+    (if (null test)
+	(return-from deregister-test nil))
+    
+    (with-accessors ((id id)
+		     (name name)
+		     (tags tags)
+		     (file-on-disk file-on-disk)) test
+      
+      (remhash id *test-ids*)
+      (remhash name *test-names*)
+      (loop for tag in tags
+	 do (hash-ext-array-remove tag id *test-tags*))
+      (remhash id *test-ids-paths*)
+  
+    test)))
 
 (let ((x 0))
   (defun new-test-id ()
@@ -40,6 +78,12 @@
 	 test-identifier)
 	(t nil)))
 
+(defun get-test (test-identifier)
+  (test-cond test-identifier))
+
+(defun fetch-test (test-identifier)
+  (test-cond test-identifier))
+
 (defun tag-cond (tag-identifier)
   (cond ((and (not (listp tag-identifier))
 	      (not (stringp tag-identifier))
@@ -62,6 +106,9 @@
 	(setf result (make-array 1 :initial-element (test-cond test-identifier)))
 	(setf result (map 'vector #'test-cond test-identifier)))
     (remove-duplicates result :test #'eq)))
+
+(defun get-tests (test-identifier)
+  (fetch-tests test-identifier))
     
 (defun fetch-tests-from-tags (tag-identifiers)
   (let ((result (loop for tags in (tag-cond tag-identifiers)
@@ -69,6 +116,9 @@
 		   collect (gethash tags *test-tags*))))
 
     (remove-duplicates (apply #'concatenate 'vector result) :test #'eq)))
+
+(defun get-tests-from-tags (tag-identifiers)
+  (fetch-tests-from-tags tag-identifiers))
 
 (defun deregister-tests (test-sequence)
   (map 'vector #'identity (loop for test across (fetch-tests test-sequence)
@@ -83,7 +133,7 @@
 		 (map 'list #'fetch-tests test-sequences)) 
 	  :test #'eq)))
 
-(defun run-tests (test-sequence &key (re-evaluate 'auto))
+(defun run-tests (&optional (test-sequence (all-tests)) (re-evaluate 'auto))
   (cond ((eq re-evaluate 'auto) (map 'vector #'run-test (fetch-tests test-sequence)))
 	((eq re-evaluate t) (map 'vector #'run-test-re-evaluate (fetch-tests test-sequence)))
 	((eq re-evaluate nil) (map 'vector #'run-test-no-evaluate (fetch-tests test-sequence)))
@@ -152,6 +202,15 @@
     
     tests))
 
+(defun serialise-tests (directory-path &optional (test-sequence (all-tests)))
+  (loop for test across (fetch-tests test-sequence)
+       do (serialise test directory-path)))
+
+(defun load-tests (directory-path)
+  (loop 
+     for test-path in (remove-if #'cl-fad:directory-pathname-p (cl-fad:list-directory directory-path))
+       do (load-test test-path)))
+
 
 (defmacro with-gensyms (syms &body body)
   `(let ,(loop for s in syms collect `(,s (gensym)))
@@ -163,3 +222,4 @@
       `(let (,,@(loop for g in gensyms for n in names collect ``(,,g ,,n)))
         ,(let (,@(loop for n in names for g in gensyms collect `(,n ,g)))
            ,@body)))))
+

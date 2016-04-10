@@ -22,7 +22,6 @@
 (relative-load "test-makers.lisp")
 (relative-load "test-stats.lisp")
 
-;(relative-load "test-functions.lisp")
 ;(relative-load "test-tag-definition.lisp")
 ;(relative-load "project-manager.lisp")
 ;(relative-load "test-management.lisp")
