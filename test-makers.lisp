@@ -165,3 +165,27 @@
 		   :after-function-compiled-form real-compiled-after-function-form))))
 
 
+(defun load-test (pathname)
+  (with-open-file (stream pathname
+			  :direction :input
+			  :if-does-not-exist :error)
+    (let ((a-list (read stream)))
+      (make-test :name (cdr (assoc 'NAME a-list))
+		 :file-on-disk (cdr (assoc 'FILE-ON-DISK a-list))
+		 :description (cdr (assoc 'DESCRIPTION a-list))
+		 :expectation (cdr (assoc 'EXPECTATION a-list))
+		 :tags (cdr (assoc 'TAGS a-list))
+		 :re-evaluate (cdr (assoc 'RE-EVALUATE a-list))
+		 :source (cdr (assoc 'SOURCE a-list))
+		 :expected-value (cdr (assoc 'EXPECTED-VALUE a-list))
+		 :run-value (cdr (assoc 'RUN-VALUE a-list))
+		 :run-time (cdr (assoc 'RUN-TIME a-list))
+		 :result (cdr (assoc 'RESULT a-list))
+		 :before-function-source (cdr (assoc 'BEFORE-FUNCTION-SOURCE a-list))
+		 :after-function-source (cdr (assoc 'AFTER-FUNCTION-source a-list))))))
+
+(defun load-tests (directory-path)
+  (map 'vector #'identity 
+       (loop 
+	  for test-path in (remove-if #'cl-fad:directory-pathname-p (cl-fad:list-directory directory-path))
+	  collect (load-test test-path))))

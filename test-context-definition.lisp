@@ -10,7 +10,13 @@
     :initform "No description available"
     :type 'string
     :accessor description
-    :documentation "A long form textual description of the test context.")
+    :documentation "A long form textual description of the context.")
+   (file-on-disk
+    :initarg :file-on-disk
+    :initform nil
+    :type 'string
+    :accessor file-on-disk
+    :documentation "The name of the context as written out to disk in the project's context folder")
    (re-evaluate
     :initarg :re-evaluate
     :accessor re-evaluate
@@ -45,36 +51,45 @@
     (print-unreadable-object (object stream :type t)
       (with-accessors ((name name)
 		       (description description)
+		       (file-on-disk file-on-disk)
 		       (re-evaluate re-evaluate)
 		       (before-function-source before-function-source)
 		       (after-function-source after-function-source)) object
-	(format stream "~& NAME: ~a~& DESCRIPTION: ~a~& RE-EVALUATE EACH RUN: ~a~&"		
-		name description re-evaluate)
+	(format stream "~& NAME: ~a~& DESCRIPTION: ~a~& FILE-ON-DISK: ~a~& RE-EVALUATE EACH RUN: ~a~&"		
+		name description file-on-disk re-evaluate)
 	(if before-function-source (format stream "~& SOURCE OF FUNCTION TO SETUP CONTEXT: ~a"  before-function-source))
 	(if after-function-source (format stream "~& SOURCE OF FUNCTION TO TEAR DOWN CONTEXT: ~a" after-function-source)))))
 
 (defun make-context (&key
 		       name
 		       description
+		       file-on-disk
 		       re-evaluate
 		       before-function-source
 		       after-function-source)
 
   (let ((real-name nil)
 	(real-desc nil)
+	(real-fod nil)
 	(real-before-function-source nil)
 	(real-compiled-before-function-form nil)
 	(real-after-function-source nil)
 	(real-compiled-after-function-form nil)
-	(final-tag nil))
+	(final-context nil))
 
-    ;;producing the test-tag name
+    ;;producing the test-context name
     (if (not (stringp name))
 	(progn
-	  (format t "A test-tag must be created with a name, which must be a string.")
-	   (return-from make-test-tag nil)))
-
+	  (format t "A context must be created with a name, which must be a string.")
+	   (return-from make-context nil)))
+    
     (setf real-name (string-upcase name))
+
+    (if (gethash real-name *test-contexts*)
+		(progn
+		  (format t "The name ~a is already registered to a currently loaded context.~&" 
+			  real-name)
+		  (return-from make-context nil)))
 
     ;;producing description
     (if (or (not description)
@@ -82,7 +97,13 @@
 	(setf real-desc "No valid description available.")
 	(setf real-desc description))
     
-    ;;producing test before-function-source
+    ;;producing a potential file-name for the test on disk 
+    (cond ((not file-on-disk) (setf real-fod (concatenate 'string real-name ".context")))
+	  ((and (stringp file-on-disk) (ends-with-p file-on-disk ".context"))
+	   (setf real-fod file-on-disk))
+	  (t (setf real-fod (concatenate 'string file-on-disk ".context"))))
+    
+    ;;producing before-function-source
     (cond ((null before-function-source)
 	   (setf real-before-function-source nil))
 	  ((and (listp before-function-source) (not (equal (car before-function-source) 'lambda)))
@@ -91,12 +112,12 @@
 	   (setf real-before-function-source before-function-source))
 	  (t 
 	   (setf real-before-function-source (list 'lambda nil before-function-source))))
-    ;;producing test before-function-compiled
+    ;;producing before-function-compiled
     (if (null real-before-function-source)
 	(setf real-compiled-before-function-form *test-empty-function*)
 	(setf real-compiled-before-function-form (eval real-before-function-source)))
     
-    ;;producing test after-function-source
+    ;;producing after-function-source
     (cond ((null after-function-source)
 	   (setf real-after-function-source nil))
 	  ((and (listp after-function-source) (not (equal (car after-function-source) 'lambda)))
@@ -105,12 +126,12 @@
 	   (setf real-after-function-source after-function-source))
 	  (t 
 	   (setf real-after-function-source (list 'lambda nil after-function-source))))
-    ;;producing test after-function-compiled
+    ;;producing after-function-compiled
     (if (null real-after-function-source)
 	(setf real-compiled-after-function-form *test-empty-function*)
 	(setf real-compiled-after-function-form (eval real-after-function-source)))
 
-	(setf final-tag (make-instance 'context
+	(setf final-context (make-instance 'context
 				       :name real-name
 				       :description real-desc
 				       :re-evaluate re-evaluate
@@ -119,106 +140,41 @@
 				       :after-function-source real-after-function-source
 				       :after-function-compiled-form real-compiled-after-function-form))
 	
-	(setf (gethash (name final-tag) *test-tags*) final-tag)
+	(setf (gethash (name final-context) *test-contexts*) final-context)
 	
-	final-tag))
+	final-context))
 
-(defun config-structure-to-test-tag (config-structure)
-  (let ((name (values-from-config-list 'NAME config-structure))
-	(description (values-from-config-list 'DESCRIPTION config-structure))
-	(before-function-source (values-from-config-list 'BEFORE-FUNCTION-SOURCE config-structure))
-	(after-function-source (values-from-config-list 'AFTER-FUNCTION-SOURCE config-structure)))
+(defmethod serialise (pathname (object context))
+  (let ((local-pathname (if (cl-fad:directory-pathname-p pathname)
+			    (cl-fad:merge-pathnames-as-file pathname (concatenate 'string (name object) ".context"))
+			    pathname)))
     
-    (make-test-tag :name (car name)
-		   :description (car description)
-		   :before-function-source (car before-function-source)
-		   :after-function-source (car after-function-source))))
-
-(defun test-tag-to-config-structure (test-tag)
-  (let ((config-structure ()))
-    (with-accessors ((name name)
-		     (description description)
-		     (before-function-source before-function-source)
-		     (after-function-source after-function-source)) test-tag
-
-    (setf config-structure (add-value-to-config-key after-function-source 'after-function-source config-structure))
-    (setf config-structure (add-value-to-config-key before-function-source 'before-function-source config-structure))
-    (setf config-structure (add-value-to-config-key description 'description config-structure))
-    (setf config-structure (add-value-to-config-key name 'name config-structure))
+    (with-open-file (stream local-pathname
+			    :direction :output
+			    :if-exists :supersede
+			    :if-does-not-exist :create)
+      
+      (print (list (cons 'NAME (name object))
+		   (cons 'FILE-ON-DISK (concatenate 'string 
+						    (pathname-name local-pathname)
+						    "."
+						    (pathname-type local-pathname)))
+		   (cons 'DESCRIPTION (description object))
+		   (cons 'RE-EVALUATE (re-evaluate object))
+		   (cons 'BEFORE-FUNCTION-SOURCE (before-function-source object))
+		   (cons 'AFTER-FUNCTION-SOURCE (after-function-source object))) stream))
     
-    config-structure)))
+    local-pathname))
 
-(defun test-tag-to-disk (file-pathname tag)
-  (let* ((test-tag (cond ((typep tag 'test-tag) tag)
-			 ((stringp tag) (gethash (string-upcase tag) *test-tags*))
-			 (t (return-from test-tag-to-disk nil))))
-	 (config (test-tag-to-config-structure test-tag)))
+(defun load-context (pathname)
+  (with-open-file (stream pathname
+			  :direction :input
+			  :if-does-not-exist :error)
+    (let ((a-list (read stream)))
+      (make-context :name (cdr (assoc 'NAME a-list))
+		    :file-on-disk (cdr (assoc 'FILE-ON-DISK a-list))
+		    :description (cdr (assoc 'DESCRIPTION a-list))
+		    :re-evaluate (cdr (assoc 'RE-EVALUATE a-list))
+		    :before-function-source (cdr (assoc 'BEFORE-FUNCTION-SOURCE a-list))
+		    :after-function-source (cdr (assoc 'AFTER-FUNCTION-source a-list))))))
 
-    (with-open-file (stream file-pathname
-			  :direction :output
-			  :if-exists :supersede
-			  :if-does-not-exist :create)
-    (format stream "(")
-    (loop for key in config
-       do (format stream "~&(")
-       do (format stream "~S~%" (first key))
-	  (format stream "~{    ~S~^~%~}" (cdr key))
-       do (format stream ")"))
-    (format stream ")"))
-    file-pathname))
-
-(defun test-tag-from-disk (file-pathname)
-  (let ((*read-eval* nil))
-	(with-open-file (stream file-pathname
-				:direction :input
-				:if-does-not-exist nil)
-	  
-	 (config-structure-to-test-tag (read stream nil nil)))))
-
-(defun add-before-function-to-tag (before-function-source tag)
-  
-  (let ((test-tag (cond ((typep tag 'test-tag) tag)
-			((stringp tag) (gethash (string-upcase tag) *test-tags*))
-			(t (return-from add-before-function-to-tag nil)))))
-       
-    (setf (before-function-source test-tag)
-	  (cond ((null before-function-source) nil)
-		((and (listp before-function-source) (not (equal (car before-function-source) 'lambda)))
-		 (list 'lambda nil before-function-source))
-		((and (listp before-function-source) (equal (car before-function-source) 'lambda))
-		 before-function-source)
-		(t 
-		 (list 'lambda nil before-function-source))))
-
-    (setf (before-function-compiled-form test-tag)
-	  (eval (before-function-source test-tag)))
-
-    test-tag))
-
-(defun add-after-function-to-tag (after-function-source tag)  
-  (let ((test-tag (cond ((typep tag 'test-tag) tag)
-			((stringp tag) (gethash (string-upcase tag) *test-tags*))
-			(t (return-from add-after-function-to-tag nil)))))
-       
-    (setf (after-function-source test-tag)
-	  (cond ((null after-function-source) nil)
-		((and (listp after-function-source) (not (equal (car after-function-source) 'lambda)))
-		 (list 'lambda nil after-function-source))
-		((and (listp after-function-source) (equal (car after-function-source) 'lambda))
-		 after-function-source)
-		(t 
-		 (list 'lambda nil after-function-source))))
-
-    (setf (after-function-compiled-form test-tag)
-	  (eval (after-function-source test-tag)))
-
-    test-tag))
-
-(defun wrap-tag-in-functions (before-function after-function tag)
-  (let ((test-tag (cond ((typep tag 'test-tag) tag)
-			((stringp tag) (gethash (string-upcase tag) *test-tags*))
-			(t (return-from wrap-tag-in-functions nil)))))
-    (setf test-tag (add-before-function-to-tag before-function test-tag))
-    (setf test-tag (add-after-function-to-tag after-function tag))
-    
-    test-tag))

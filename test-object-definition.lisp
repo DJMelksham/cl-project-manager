@@ -114,7 +114,7 @@
     :documentation "A compiled zero argument function that will be funcall'd after the test")))
 
 (defgeneric serialise (pathname object)
-  (:documentation "Serialse the given object to disk"))
+  (:documentation "Serialise the given object to disk"))
 
 (defmethod serialise (pathname (object test))
   (let ((local-pathname (if (cl-fad:directory-pathname-p pathname)
@@ -128,6 +128,7 @@
     (print (list (cons 'NAME (name object))
 		 (cons 'FILE-ON-DISK (concatenate 'string 
 						  (pathname-name local-pathname)
+						  "."
 						  (pathname-type local-pathname)))
 		 (cons 'DESCRIPTION (description object))
 		 (cons 'EXPECTATION (expectation object))
@@ -142,24 +143,6 @@
 		 (cons 'AFTER-FUNCTION-SOURCE (after-function-source object))) stream))
     
     local-pathname))
-
-(defun load-test (pathname)
-  (with-open-file (stream pathname
-			  :direction :input
-			  :if-does-not-exist :error)
-    (let ((a-list (read stream)))
-      (make-test :name (cdr (assoc 'NAME a-list))
-		 :file-on-disk (cdr (assoc 'FILE-ON-DISK a-list))
-		 :description (cdr (assoc 'DESCRIPTION a-list))
-		 :expectation (cdr (assoc 'EXPECTATION a-list))
-		 :tags (cdr (assoc 'TAGS a-list))
-		 :source (cdr (assoc 'SOURCE a-list))
-		 :expected-value (cdr (assoc 'EXPECTED-VALUE a-list))
-		 :run-value (cdr (assoc 'RUN-VALUE a-list))
-		 :run-time (cdr (assoc 'RUN-TIME a-list))
-		 :result (cdr (assoc 'RESULT a-list))
-		 :before-function-source (cdr (assoc 'BEFORE-FUNCTION-SOURCE a-list))
-		 :after-function-source (cdr (assoc 'AFTER-FUNCTION-source a-list))))))
 
 (defmethod print-object ((object test) stream)
   (print-unreadable-object (object stream)
@@ -181,7 +164,7 @@
 
 	(cond ((eq *print-verbosity* 'high)
 	       (progn
-		 (format stream "-------------------->~& ID: ~a~& NAME: ~a~& DESCRIPTION: ~a~& TAGS: ~a~& RE-EVALUATE EACH RUN: ~a"		id name description tags re-evaluate)
+		 (format stream "-------------------->~& ID: ~a~& NAME: ~a~& DESCRIPTION: ~a~& FILE-ON-DISK: ~a~& TAGS: ~a~& RE-EVALUATE EACH RUN: ~a"		id name description file-on-disk tags re-evaluate)
 		 (format stream "~& SOURCE: ")
 		 (format stream "~{~a~^~&~}" (cddr source))
 		 (format stream "~& EXPECTATION: ~a" expectation)

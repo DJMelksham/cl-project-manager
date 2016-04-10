@@ -55,6 +55,16 @@
   
     test)))
 
+(defun all-tests (&key (verbosity *print-verbosity*))
+ (let ((*print-verbosity* verbosity)) 
+  (map 'vector #'identity (loop for tests being the hash-values in *test-ids*
+			     collect tests))))
+
+(defun ends-with-p (str1 str2)
+  "Determine whether `str1` ends with `str2`"
+  (let ((p (mismatch str2 str1 :from-end T)))
+    (or (not p) (= 0 p))))
+
 (let ((x 0))
   (defun new-test-id ()
     (if (boundp '*test-ids*)
@@ -84,17 +94,37 @@
 (defun fetch-test (test-identifier)
   (test-cond test-identifier))
 
+(defun get-context (context-identifier)
+   (cond ((symbolp context-identifier)
+	  (gethash (string-upcase context-identifier) *test-contexts*))
+	 ((stringp context-identifier) 
+	  (gethash (string-upcase context-identifier) *test-contexts*))
+	 (t nil)))
+
+(defun deregister-context (context-name)
+		    (remhash context-name *test-contexts*))
+
 (defun tag-cond (tag-identifier)
-  (cond ((and (not (listp tag-identifier))
-	      (not (stringp tag-identifier))
-	      (notevery #'stringp tag-identifier)) 
-	   nil)
-	  ((stringp tag-identifier) 
-	   (list (string-upcase tag-identifier)))
-	  ((typep tag-identifier 'sequence) 
-	   (remove-duplicates (map 'list #'string-upcase tag-identifier) :test #'equalp))
-	  (t nil)))
-	      
+  (remove-if-not 
+   (lambda (x) (gethash x *test-tags*))
+   (cond ((symbolp tag-identifier)
+	  (list (string-upcase tag-identifier)))
+	 ((and (not (listp tag-identifier))
+	       (not (stringp tag-identifier))
+	       (notevery #'stringp tag-identifier)) 
+	  nil)
+	 ((stringp tag-identifier) 
+	  (list (string-upcase tag-identifier)))
+	 ((typep tag-identifier 'sequence) 
+	  (remove-duplicates (map 'list #'string-upcase tag-identifier) :test #'equalp))
+	 (t nil))))
+
+(defun get-tag (tag-identifier)
+  (car (tag-cond tag-identifier)))
+
+(defun fetch-tag (tag-identifier)
+  (car (tag-cond tag-identifier)))
+
 (defun fetch-tests (test-identifier)
   (let* ((result nil))
     
@@ -171,11 +201,6 @@
 (defun medium-verbosity ()
   (setf *print-verbosity* 'medium))
 
-(defun all-tests (&key (verbosity *print-verbosity*))
- (let ((*print-verbosity* verbosity)) 
-  (map 'vector #'identity (loop for tests being the hash-values in *test-ids*
-			     collect tests))))
-
 (defun detail-tests (test-sequence)
   (let ((*print-verbosity* 'high))
     (fetch-tests test-sequence)))
@@ -203,14 +228,8 @@
     tests))
 
 (defun serialise-tests (directory-path &optional (test-sequence (all-tests)))
-  (loop for test across (fetch-tests test-sequence)
-       do (serialise test directory-path)))
-
-(defun load-tests (directory-path)
-  (loop 
-     for test-path in (remove-if #'cl-fad:directory-pathname-p (cl-fad:list-directory directory-path))
-       do (load-test test-path)))
-
+  (map 'vector #'identity (loop for test across (fetch-tests test-sequence)
+       collect (serialise directory-path test))))
 
 (defmacro with-gensyms (syms &body body)
   `(let ,(loop for s in syms collect `(,s (gensym)))
@@ -223,3 +242,24 @@
         ,(let (,@(loop for n in names for g in gensyms collect `(,n ,g)))
            ,@body)))))
 
+
+(defmacro with-context (context-identifier &rest forms)
+  (once-only (context-identifier)
+    `(let ((result nil))
+
+       (if (re-evaluate (get-context ,context-identifier))
+	   (funcall (eval (before-function-source (get-context ,context-identifier))))
+	   (funcall (before-function-compiled-form (get-context ,context-identifier))))
+     
+       (setf result (progn
+		      ,@forms))
+  
+       (if (re-evaluate (get-context ,context-identifier))
+	   (funcall (eval (after-function-source (get-context ,context-identifier))))
+	   (funcall (after-function-compiled-form (get-context ,context-identifier))))
+     
+       result)))
+     
+
+      
+  
