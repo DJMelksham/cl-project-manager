@@ -8,9 +8,9 @@
 		    re-evaluate
 		    source
 		    expected-value
-		    run-value
-		    run-time
-		    result
+		    (run-value nil)
+		    (run-time 0.0)
+		    (result nil)
 		    before-function-source
 		    after-function-source)
   (let ((real-id (if (null id) (new-test-id) id))

@@ -260,3 +260,12 @@
 	 
 	 ,result))))
 
+(defmacro defun-with-synonyms (names &rest body)
+  (append (list 'progn) 
+	  (loop for name in names
+	     for head-form = (list 'defun name) then (list 'defun name)
+	       for tail-form = nil then nil
+	       do (loop for things in body
+		       do (push things tail-form)
+		     finally (setf tail-form (nreverse tail-form)))
+	       collect (append head-form tail-form))))

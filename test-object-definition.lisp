@@ -80,7 +80,7 @@
     :documentation "The last value obtained (if any) when the test function was last applied successfully")
    (run-time
     :initarg :run-time
-    :initform nil
+    :initform 0.0
     :accessor run-time
     :documentation "The time taken for the test to complete, including before/after functions.")
    (result
