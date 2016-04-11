@@ -242,24 +242,21 @@
         ,(let (,@(loop for n in names for g in gensyms collect `(,n ,g)))
            ,@body)))))
 
-
 (defmacro with-context (context-identifier &rest forms)
-  (once-only (context-identifier)
-    `(let ((result nil))
+  (with-gensyms (result)
+    (once-only (context-identifier)
+      `(let ((,result nil))
+	 
+	 (if (re-evaluate (get-context ,context-identifier))
+	     (funcall (eval (before-function-source (get-context ,context-identifier))))
+	     (funcall (before-function-compiled-form (get-context ,context-identifier))))
+	 
+	 (setf ,result (progn
+			,@forms))
+	 
+	 (if (re-evaluate (get-context ,context-identifier))
+	     (funcall (eval (after-function-source (get-context ,context-identifier))))
+	     (funcall (after-function-compiled-form (get-context ,context-identifier))))
+	 
+	 ,result))))
 
-       (if (re-evaluate (get-context ,context-identifier))
-	   (funcall (eval (before-function-source (get-context ,context-identifier))))
-	   (funcall (before-function-compiled-form (get-context ,context-identifier))))
-     
-       (setf result (progn
-		      ,@forms))
-  
-       (if (re-evaluate (get-context ,context-identifier))
-	   (funcall (eval (after-function-source (get-context ,context-identifier))))
-	   (funcall (after-function-compiled-form (get-context ,context-identifier))))
-     
-       result)))
-     
-
-      
-  
