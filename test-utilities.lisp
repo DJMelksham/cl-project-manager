@@ -267,5 +267,15 @@
 	       for tail-form = nil then nil
 	       do (loop for things in body
 		       do (push things tail-form)
-		     finally (setf tail-form (nreverse tail-form)))
+		     finally (setf tail-form (reverse tail-form)))
+	       collect (append head-form tail-form))))
+
+(defmacro defmacro-with-synonyms (names &rest body)
+  (append (list 'progn) 
+	  (loop for name in names
+	     for head-form = (list 'defmacro name) then (list 'defmacro name)
+	       for tail-form = nil then nil
+	       do (loop for things in body
+		       do (push things tail-form)
+		     finally (setf tail-form (reverse tail-form)))
 	       collect (append head-form tail-form))))
