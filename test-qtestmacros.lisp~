@@ -1,0 +1,314 @@
+(defmacro qtest (&key 
+		   name
+		   description
+		   (source +)
+		   (expected-value *)
+		    before-function-source
+		    after-function-source)
+  `(make-test :name ,name
+	      :description ,description
+	      :expectation "EQUALP"
+	      :source ',source
+	      :expected-value ,expected-value
+	      :before-function-source ',before-function-source
+	      :after-function-source ',after-function-source))
+
+(defmacro qtest-EQ (&key 
+		   name
+		   description
+		   (source +)
+		   (expected-value *)
+		    before-function-source
+		    after-function-source)
+  `(make-test :name ,name
+	      :description ,description
+	      :expectation "EQUALP"
+	      :source ',source
+	      :expected-value ,expected-value
+	      :before-function-source ',before-function-source
+	      :after-function-source ',after-function-source))
+
+(defmacro qtest= (&key 
+		   name
+		   description
+		   (source +)
+		   (expected-value *)
+		    before-function-source
+		    after-function-source)
+  `(make-test :name ,name
+	      :description ,description
+	      :expectation "EQUALP"
+	      :source ',source
+	      :expected-value ,expected-value
+	      :before-function-source ',before-function-source
+	      :after-function-source ',after-function-source))
+
+(defmacro qtest-EQL (&key 
+		   name
+		   description
+		   (source +)
+		   (expected-value *)
+		    before-function-source
+		    after-function-source)
+  `(make-test :name ,name
+	      :description ,description
+	      :expectation "EQUALP"
+	      :source ',source
+	      :expected-value ,expected-value
+	      :before-function-source ',before-function-source
+	      :after-function-source ',after-function-source))
+
+(defmacro qtest-EQUAL (&key 
+		   name
+		   description
+		   (source +)
+		   (expected-value *)
+		    before-function-source
+		    after-function-source)
+  `(make-test :name ,name
+	      :description ,description
+	      :expectation "EQUALP"
+	      :source ',source
+	      :expected-value ,expected-value
+	      :before-function-source ',before-function-source
+	      :after-function-source ',after-function-source))
+
+(defmacro qtest (&key 
+		   name
+		   description
+		   (source +)
+		   (expected-value *)
+		    before-function-source
+		    after-function-source)
+  `(make-test :name ,name
+	      :description ,description
+	      :expectation "EQUALP"
+	      :source ',source
+	      :expected-value ,expected-value
+	      :before-function-source ',before-function-source
+	      :after-function-source ',after-function-source))
+
+(defmacro qtest-EQUALP (&key 
+		   name
+		   description
+		   (source +)
+		   (expected-value *)
+		    before-function-source
+		    after-function-source)
+  `(make-test :name ,name
+	      :description ,description
+	      :expectation "EQUALP"
+	      :source ',source
+	      :expected-value ,expected-value
+	      :before-function-source ',before-function-source
+	      :after-function-source ',after-function-source))
+
+(defmacro qtest-NULL (&key 
+		   name
+		   description
+		   (source +)
+		   (expected-value *)
+		    before-function-source
+		    after-function-source)
+  `(make-test :name ,name
+	      :description ,description
+	      :expectation "EQUALP"
+	      :source ',source
+	      :expected-value ,expected-value
+	      :before-function-source ',before-function-source
+	      :after-function-source ',after-function-source))
+
+(defmacro qtest-T (&key 
+		   name
+		   description
+		   (source +)
+		   (expected-value *)
+		    before-function-source
+		    after-function-source)
+  `(make-test :name ,name
+	      :description ,description
+	      :expectation "EQUALP"
+	      :source ',source
+	      :expected-value ,expected-value
+	      :before-function-source ',before-function-source
+	      :after-function-source ',after-function-source))
+
+(defmacro qtest-CONDITION-OF-TYPE (&key 
+		   name
+		   description
+		   (source +)
+		   (expected-value *)
+		    before-function-source
+		    after-function-source)
+  `(make-test :name ,name
+	      :description ,description
+	      :expectation "EQUALP"
+	      :source ',source
+	      :expected-value ,expected-value
+	      :before-function-source ',before-function-source
+	      :after-function-source ',after-function-source))
+
+(defmacro qtest-ERROR (&key 
+		   name
+		   description
+		   (source +)
+		   (expected-value *)
+		    before-function-source
+		    after-function-source)
+  `(make-test :name ,name
+	      :description ,description
+	      :expectation "EQUALP"
+	      :source ',source
+	      :expected-value ,expected-value
+	      :before-function-source ',before-function-source
+	      :after-function-source ',after-function-source))
+
+(defmacro qtest-NOT-EQ (&key 
+		   name
+		   description
+		   (source +)
+		   (expected-value *)
+		    before-function-source
+		    after-function-source)
+  `(make-test :name ,name
+	      :description ,description
+	      :expectation "EQUALP"
+	      :source ',source
+	      :expected-value ,expected-value
+	      :before-function-source ',before-function-source
+	      :after-function-source ',after-function-source))
+
+(defmacro qtest/= (&key 
+		   name
+		   description
+		   (source +)
+		   (expected-value *)
+		    before-function-source
+		    after-function-source)
+  `(make-test :name ,name
+	      :description ,description
+	      :expectation "EQUALP"
+	      :source ',source
+	      :expected-value ,expected-value
+	      :before-function-source ',before-function-source
+	      :after-function-source ',after-function-source))
+
+(defmacro qtest-NOT= (&key 
+		   name
+		   description
+		   (source +)
+		   (expected-value *)
+		    before-function-source
+		    after-function-source)
+  `(make-test :name ,name
+	      :description ,description
+	      :expectation "EQUALP"
+	      :source ',source
+	      :expected-value ,expected-value
+	      :before-function-source ',before-function-source
+	      :after-function-source ',after-function-source))
+
+(defmacro qtest-NOT-EQL (&key 
+		   name
+		   description
+		   (source +)
+		   (expected-value *)
+		    before-function-source
+		    after-function-source)
+  `(make-test :name ,name
+	      :description ,description
+	      :expectation "EQUALP"
+	      :source ',source
+	      :expected-value ,expected-value
+	      :before-function-source ',before-function-source
+	      :after-function-source ',after-function-source))
+
+(defmacro qtest-NOT-EQUAL (&key 
+		   name
+		   description
+		   (source +)
+		   (expected-value *)
+		    before-function-source
+		    after-function-source)
+  `(make-test :name ,name
+	      :description ,description
+	      :expectation "EQUALP"
+	      :source ',source
+	      :expected-value ,expected-value
+	      :before-function-source ',before-function-source
+	      :after-function-source ',after-function-source))
+
+(defmacro qtest-NOT-EQUALP (&key 
+		   name
+		   description
+		   (source +)
+		   (expected-value *)
+		    before-function-source
+		    after-function-source)
+  `(make-test :name ,name
+	      :description ,description
+	      :expectation "EQUALP"
+	      :source ',source
+	      :expected-value ,expected-value
+	      :before-function-source ',before-function-source
+	      :after-function-source ',after-function-source))
+
+(defmacro qtest-NOT-NULL (&key 
+		   name
+		   description
+		   (source +)
+		   (expected-value *)
+		    before-function-source
+		    after-function-source)
+  `(make-test :name ,name
+	      :description ,description
+	      :expectation "EQUALP"
+	      :source ',source
+	      :expected-value ,expected-value
+	      :before-function-source ',before-function-source
+	      :after-function-source ',after-function-source))
+
+(defmacro qtest-NOT-T (&key 
+		   name
+		   description
+		   (source +)
+		   (expected-value *)
+		    before-function-source
+		    after-function-source)
+  `(make-test :name ,name
+	      :description ,description
+	      :expectation "EQUALP"
+	      :source ',source
+	      :expected-value ,expected-value
+	      :before-function-source ',before-function-source
+	      :after-function-source ',after-function-source))
+
+(defmacro qtest-NOT-CONDITION-OF-TYPE (&key 
+		   name
+		   description
+		   (source +)
+		   (expected-value *)
+		    before-function-source
+		    after-function-source)
+  `(make-test :name ,name
+	      :description ,description
+	      :expectation "EQUALP"
+	      :source ',source
+	      :expected-value ,expected-value
+	      :before-function-source ',before-function-source
+	      :after-function-source ',after-function-source))
+
+(defmacro qtest-NOT-ERROR (&key 
+		   name
+		   description
+		   (source +)
+		   (expected-value *)
+		    before-function-source
+		    after-function-source)
+  `(make-test :name ,name
+	      :description ,description
+	      :expectation "EQUALP"
+	      :source ',source
+	      :expected-value ,expected-value
+	      :before-function-source ',before-function-source
+	      :after-function-source ',after-function-source))

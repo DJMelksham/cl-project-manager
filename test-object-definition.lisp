@@ -1,6 +1,6 @@
 (defclass test ()
   ((expectation-table
-    :initform (let ((ex-table (make-hash-table :test #'equalp :size 32)))
+    :initform (let ((ex-table (make-hash-table :test #'equalp :size 16)))
 		(setf (gethash "EQ" ex-table) #'eq
 		      (gethash "=" ex-table) #'=
 		      (gethash "EQL" ex-table) #'eql
@@ -11,19 +11,7 @@
 		      (gethash "CONDITION-OF-TYPE" ex-table) (lambda (&optional (type 'condition) x)
 							       (typep x type))
 		      (gethash "ERROR" ex-table) (lambda (&optional (type 'error) x)
-						   (typep x type))
-		      (gethash "NOT-EQ" ex-table) (lambda (x y) (NOT (eq x y)))
-		      (gethash "/=" ex-table) (lambda (x y) (/= x y))
-		      (gethash "NOT=" ex-table) (lambda (x y) (/= x y))
-		      (gethash "NOT-EQL" ex-table) (lambda (x y) (NOT (eql x y)))
-		      (gethash "NOT-EQUAL" ex-table) (lambda (x y) (NOT (equal x y)))
-		      (gethash "NOT-EQUALP" ex-table) (lambda (x y) (NOT (equalp x y)))
-		      (gethash "NOTNULL" ex-table) (lambda (x) (NOT (NULL x)))
-		      (gethash "NOT-T" ex-table) (lambda (x y) (NOT (eq x y)))
-		      (gethash "NOT-CONDITION-OF-TYPE" ex-table) (lambda (&optional (type 'condition) x)
-								   (NOT (typep x type)))
-		      (gethash "NOT-ERROR" ex-table) (lambda (&optional (type 'error) x)
-								   (NOT (typep x type))))
+						   (typep x type)))
 		ex-table)
     :type 'hash-table
     :accessor expectation-table

@@ -60,19 +60,21 @@
     (cond ((null expectation) 
 	   (setf real-exp "EQUALP"))
 	  ((member (string-upcase expectation)
-		   (list "EQ" "EQL" "EQUAL" "EQUALP" "NULL" "NOTNULL" "T" "CONDITION-OF-TYPE") :test #'equal)
+		   (list "EQ" "=" "EQL" "EQUAL" "EQUALP" "NULL" "NOTNULL" "T" "CONDITION-OF-TYPE" "ERROR") :test #'equal)
 	   (setf real-exp (string-upcase expectation)))
 	  (t (progn
 	       (format t "Expectation ~a is not a valid kind of expectation.~&" expectation)
-	       (format t "Expectation must be one of ~S, ~S, ~S, ~S, ~S, ~S, ~S, or ~S.~&"
+	       (format t "Expectation must be one of ~S, ~S, ~S, ~S, ~S, ~S, ~S, ~S, ~S or ~S.~&"
 		       "EQ"
+		       "="
 		       "EQL"
 		       "EQUAL"
 		       "EQUALP"
 		       "NULL"
 		       "NOTNULL"
 		       "T"
-		       "CONDITION-OF-TYPE")
+		       "CONDITION-OF-TYPE"
+		       "ERROR")
 	       (return-from make-test nil))))
     
     ;;producing test tags
