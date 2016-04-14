@@ -113,8 +113,14 @@
     :initform (lambda () nil)
     :type 'function
     :accessor after-function-compiled-form
-    :documentation "A compiled zero argument function that will be funcall'd after the test")))
-
+    :documentation "A compiled zero argument function that will be funcall'd after the test")
+   (type-of-test
+    :initarg :type-of-test
+    :initform nil
+    :type 'list
+    :accessor type-of-test
+    :documentation "A flag that may be used in the future")))
+    
 (defgeneric serialise (pathname object)
   (:documentation "Serialise the given object to disk"))
 
@@ -142,7 +148,8 @@
 		 (cons 'RUN-TIME (run-time object))
 		 (cons 'RESULT (result object))
 		 (cons 'BEFORE-FUNCTION-SOURCE (before-function-source object))
-		 (cons 'AFTER-FUNCTION-SOURCE (after-function-source object))) stream))
+		 (cons 'AFTER-FUNCTION-SOURCE (after-function-source object))
+		 (cons 'TYPE-OF-TEST (type-of-test object))) stream))
     
     local-pathname))
 

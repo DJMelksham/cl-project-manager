@@ -12,7 +12,8 @@
 		    (run-time 0.0)
 		    (result nil)
 		    before-function-source
-		    after-function-source)
+		    after-function-source
+		    type-of-test)
   (let ((real-id (if (null id) (new-test-id) id))
 	(real-name nil)
 	(real-fod nil)
@@ -26,12 +27,13 @@
 	(real-before-function-source nil)
 	(real-compiled-before-function-form nil)
 	(real-after-function-source nil)
-	(real-compiled-after-function-form nil))
+	(real-compiled-after-function-form nil)
+	(real-type-of-test nil))
 
     ;;producing test name
 
     (if (not name) 
-	(setf real-name (concatenate 'string "TEST-" (write-to-string real-id)))
+	(setf real-name (concatenate 'string (package-name *package*) ":TEST-" (write-to-string real-id)))
 	(setf real-name (string-upcase name)))
     
     (if (gethash real-name *test-names*)
@@ -146,6 +148,12 @@
 	    (equal real-after-function-source '(lambda () nil)))
 	(setf real-compiled-after-function-form *test-empty-function*)
 	(setf real-compiled-after-function-form (eval real-after-function-source)))
+	
+    ;;set type-of-test
+	(if (or (null type-of-test)
+		(eq type-of-test 'nw))
+	    (setf real-type-of-test type-of-test)
+	    (setf real-type-of-test nil))
 
       (register-test  (make-instance 'test
 		   :id real-id
@@ -164,7 +172,8 @@
 		   :before-function-source real-before-function-source
 		   :before-function-compiled-form real-compiled-before-function-form
 		   :after-function-source real-after-function-source
-		   :after-function-compiled-form real-compiled-after-function-form))))
+		   :after-function-compiled-form real-compiled-after-function-form
+		   :type-of-test real-type-of-test))))
 
 
 (defun load-test (pathname)
@@ -184,7 +193,8 @@
 		 :run-time (cdr (assoc 'RUN-TIME a-list))
 		 :result (cdr (assoc 'RESULT a-list))
 		 :before-function-source (cdr (assoc 'BEFORE-FUNCTION-SOURCE a-list))
-		 :after-function-source (cdr (assoc 'AFTER-FUNCTION-source a-list))))))
+		 :after-function-source (cdr (assoc 'AFTER-FUNCTION-source a-list))
+		 :type-of-test (cdr (assoc 'TYPE-OF-TEST a-list))))))
 
 (defun load-tests (directory-path)
   (map 'vector #'identity 
