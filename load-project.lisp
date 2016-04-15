@@ -22,6 +22,7 @@
 (relative-load "test-makers.lisp")
 (relative-load "test-stats.lisp")
 (relative-load "test-context-definition.lisp")
+(relative-load "test-testmacros.lisp")
 
 ;(relative-load "project-manager.lisp")
 ;(relative-load "test-management.lisp")

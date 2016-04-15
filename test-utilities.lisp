@@ -79,21 +79,6 @@
 	nil
 	(setf x number))))
 
-(defun test-cond (test-identifier)
-  (cond ((integerp test-identifier) 
-	 (gethash test-identifier *test-ids*))
-	((or (stringp test-identifier) (symbolp test-identifier)) 
-	 (gethash (string-upcase test-identifier) *test-names*))
-	((typep test-identifier 'test)
-	 test-identifier)
-	(t nil)))
-
-(defun get-test (test-identifier)
-  (test-cond test-identifier))
-
-(defun fetch-test (test-identifier)
-  (test-cond test-identifier))
-
 (defun get-context (context-identifier)
    (cond ((symbolp context-identifier)
 	  (gethash (string-upcase context-identifier) *test-contexts*))

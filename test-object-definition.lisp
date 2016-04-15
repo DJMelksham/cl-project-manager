@@ -1,3 +1,11 @@
+;; This function is currently living here because it is needed later
+;; and I'm thinking about where to put it, and how to structure the 
+;; project.
+
+(defun undefined-warning-p (w)
+  (let ((control (simple-condition-format-control w)))
+         (string= control "undefined ~(~A~): ~S")))
+
 (defclass test ()
   ((expectation-table
     :initform (let ((ex-table (make-hash-table :test #'equalp :size 16)))
@@ -6,9 +14,10 @@
 		      (gethash "EQL" ex-table) #'eql
 		      (gethash "EQUAL" ex-table) #'equal
 		      (gethash "EQUALP" ex-table) #'equalp
-		      (gethash "NULL" ex-table) (lambda (x y) (not (eq x y)))
+		      (gethash "NULL" ex-table) (lambda (x y) (eq x y))
+		      (gethash "NOT-NULL" ex-table) (lambda (x y) (not (eq x y)))
 		      (gethash "T" ex-table) (lambda (x y) (eq x y))
-		      (gethash "CONDITION-OF-TYPE" ex-table) (lambda (&optional (type 'condition) x)
+		      (gethash "CONDITION" ex-table) (lambda (&optional (type 'condition) x)
 							       (typep x type))
 		      (gethash "ERROR" ex-table) (lambda (&optional (type 'error) x)
 						   (typep x type)))

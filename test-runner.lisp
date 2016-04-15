@@ -1,4 +1,19 @@
-(defun run-test (test &key (re-evaluate 'auto))
+(defun test-cond (test-identifier)
+  (cond ((integerp test-identifier) 
+	 (gethash test-identifier *test-ids*))
+	((or (stringp test-identifier) (symbolp test-identifier)) 
+	 (gethash (string-upcase test-identifier) *test-names*))
+	((typep test-identifier 'test)
+	 test-identifier)
+	(t nil)))
+
+(defun get-test (test-identifier)
+  (test-cond test-identifier))
+
+(defun fetch-test (test-identifier)
+  (test-cond test-identifier))
+
+(defun run-test (test-identifier &key (re-evaluate 'auto))
  
   (macrolet ((nw-eval? (&rest body)
 	       `(if (not (eq (type-of-test test) 'nw))
@@ -10,7 +25,8 @@
 				(invoke-restart 'muffle-warning)))))
 		      (eval ,@body)))))
  
-    (let ((test-time-start 0)
+    (let ((test (get-test test-identifier))
+	  (test-time-start 0)
 	  (test-time-stop 0))
       
       (setf test-time-start (get-internal-real-time))

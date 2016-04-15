@@ -5,3 +5,4 @@
 (defvar *print-verbosity* 'high)
 (defvar *test-ids-paths* (make-hash-table :test 'equalp))
 (defvar *test-empty-function* (lambda () nil))
+(defvar *test-style-warnings* T)
