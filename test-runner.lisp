@@ -1,10 +1,10 @@
 (defun test-cond (test-identifier)
-  (cond ((integerp test-identifier) 
+  (cond ((typep test-identifier 'test)
+	 test-identifier)
+	((integerp test-identifier) 
 	 (gethash test-identifier *test-ids*))
 	((or (stringp test-identifier) (symbolp test-identifier)) 
 	 (gethash (string-upcase test-identifier) *test-names*))
-	((typep test-identifier 'test)
-	 test-identifier)
 	(t nil)))
 
 (defun get-test (test-identifier)
@@ -25,7 +25,7 @@
 				(invoke-restart 'muffle-warning)))))
 		      (eval ,@body)))))
  
-    (let ((test (get-test test-identifier))
+    (let ((test (test-cond test-identifier))
 	  (test-time-start 0)
 	  (test-time-stop 0))
       

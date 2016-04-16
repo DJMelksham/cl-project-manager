@@ -55,10 +55,9 @@
   
     test)))
 
-(defun all-tests (&key (verbosity *print-verbosity*))
- (let ((*print-verbosity* verbosity)) 
+(defun all-tests ()
   (map 'vector #'identity (loop for tests being the hash-values in *test-ids*
-			     collect tests))))
+			     collect tests)))
 
 (defun ends-with-p (str1 str2)
   "Determine whether `str1` ends with `str2`"

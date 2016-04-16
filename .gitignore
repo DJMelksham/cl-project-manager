@@ -1,0 +1,6 @@
+"#Ignore emacs editor temporary files
+[#]*[#]
+*~
+
+#Ignore cl-project-manager files
+"

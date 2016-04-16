@@ -1,0 +1,5 @@
+(
+(LOAD-FILE
+    "load-cl-project-manager.lisp")
+(TEST-FOLDER
+    "tests/"))
