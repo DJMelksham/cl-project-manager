@@ -1,7 +1,7 @@
 (in-package :cl-user)
-(defpackage cl-project-manager
+(defpackage peasant
   (:use :cl))
-(in-package :cl-project-manager)
+(in-package :peasant)
 
 (ql:quickload 'cl-fad)
 
@@ -15,14 +15,3 @@
 (relative-load "file-management.lisp")
 (relative-load "config-low-level-functions.lisp")
 (relative-load "module-management.lisp")
-(relative-load "test-variable-definitions.lisp")
-(relative-load "test-object-definition.lisp")
-(relative-load "test-runner.lisp")
-(relative-load "test-utilities.lisp")
-(relative-load "test-makers.lisp")
-(relative-load "test-stats.lisp")
-(relative-load "test-context-definition.lisp")
-(relative-load "test-testmacros.lisp")
-
-;(relative-load "project-manager.lisp")
-;(relative-load "test-management.lisp")
