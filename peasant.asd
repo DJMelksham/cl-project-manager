@@ -1,6 +1,6 @@
 ;;;; -*- Mode: Lisp; Syntax: ANSI-Common-Lisp; Base: 10 -*-
 
-(defsystem peasant
+(defsystem #:peasant
   :name "peasant"
   :version "0.0.0"
   :maintainer "Damien John Melksham"
@@ -18,4 +18,4 @@
 	       (:file "config-low-level-functions")
 	       (:file "module-management"))
 
-  :depends-on ("cl-fad" "testy" "gittest"))
+  :depends-on (#:cl-fad #:testy #:gittest))
