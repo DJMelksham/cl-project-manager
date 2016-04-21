@@ -1,3 +1,5 @@
+(in-package #:peasant)
+
 (defun config-to-disk (dir config &optional (config-name *module-config-name*))
   (with-open-file (stream (merge-pathnames config-name dir)
 			  :direction :output

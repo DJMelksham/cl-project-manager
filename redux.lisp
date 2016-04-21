@@ -1,19 +1,17 @@
+(in-package #:peasant)
+
 (defvar *active-project* nil)
 (defvar *active-project-path* nil)
 (defvar *test-folder-name* "tests/")
 (defvar *test-path* nil)
 
-(defun prompt-read (prompt)
-  (format *query-io* "~a: " prompt)
-  (read-line *query-io*))
-
-(defun active-project (system-keyword)
+(defun active-project (system-keyword &key test-path)
     ;;set active project
     ;;also make sure active-ness is set in gittest and possibly testy?
   (if (and (symbolp *active-project*)
 	   (pathnamep *active-project*)
 	   (pathnamep *test-path*)
-	   (= (not (stat-number-tests (all-tests))) 0)
+	   (not (= (testy:stat-number-tests (testy:all-tests)) 0))
 	   (y-or-n-p (concatenate
 		      'string
 		      "Sir, you already have an active project "
@@ -21,23 +19,28 @@
 		      "with tests defined.  Serialise current tests before changing projects?")))
       (testy:serialise-tests *test-path*))
 
-      (testy:deregister-tests (all-tests))
+      (testy:deregister-tests (testy:all-tests))
 
       (setf *active-project* system-keyword)
       (setf *active-project-path* (asdf:system-source-directory system-keyword))
-      (setf *test-path*
-	    (uiop/pathname:merge-pathnames*
-	     (asdf-utils:ensure-directory-pathname *test-folder-path*)
-	     (asdf:system-source-directory :gittest)))
 
+      (print test-path)
+      (if (null test-path)
+	  (setf *test-path*
+		(uiop:merge-pathnames*
+		 (uiop:ensure-directory-pathname *test-folder-name*)
+		 (asdf:system-source-directory system-keyword))))
       (asdf/cl:ensure-directories-exist *test-path*)
+
+      (gittest:set-gittest-active-directory *active-project-path*)
 
       (testy:load-tests *test-path*)
 
-      (format t "~&ACTIVE PROJECT: ~a~&PROJECT PATH: ~a~&~a TESTS LOADED."
+      (format t "~&ACTIVE PROJECT: ~a~&PROJECT PATH: ~a~&TESTS PATH: ~a~&~a TESTS LOADED"
 	      *active-project*
 	      *active-project-path*
-	      (testy:stat-number-tests (all-tests))))
+	      *test-path*
+	      (testy:stat-number-tests (testy:all-tests))))
       
 ;; Can the below be refactored to just use the gittest library?
 (defun git-folder-p (path-to-be-searched)
@@ -48,19 +51,19 @@
       T
       NIL)))
 
-(defun add-commit-push (&optional
+(defun git-add-commit-push (&key
 			  (message "Automatic peasant commit message!")
 			  (remote "origin")
 			  (branch "dev"))
   (git-add)
-  (git-commit "message")
+  (git-commit message)
   (git-push remote branch))
 
 (defun git-add ()
   (gittest:git "add -A"))
 
 (defun git-commit (message)
-  (gittest:git (concatenate 'string "commit -m " message)))
+  (gittest:git (concatenate 'string "commit -m " "'" message "'")))
 
 (defun git-push (remote branch)
   (gittest:git (concatenate 'string "push " remote " " branch)))

@@ -1,3 +1,5 @@
+(in-package #:peasant)
+
 (defun make-git-ignore-text (&optional (additional-list-of-text nil))
   (let ((string (format nil "~{~a~%~}" 
 			(append (list "#Ignore emacs editor temporary files"

@@ -1,3 +1,5 @@
+(in-package #:peasant)
+
 (defun get-git-path-string ()
   (if (string= (software-type) "Linux")
       (string-trim 

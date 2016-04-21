@@ -1,3 +1,5 @@
+(in-package #:peasant)
+
 (defvar *active-module-path* nil)
 (defvar *active-module-validated* nil)
 (defvar *active-module-config* nil)

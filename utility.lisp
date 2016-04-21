@@ -1,3 +1,5 @@
+(in-package #:peasant)
+
 (defun flatten-list (structure)
   (cond ((null structure) nil)
         ((atom structure) (list structure))

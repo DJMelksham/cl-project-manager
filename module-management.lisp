@@ -1,3 +1,5 @@
+(in-package #:peasant)
+
 (defun module-p (path &optional (module-config *module-config-name*))  
   (if (cl-fad:directory-pathname-p path) 
       (if (probe-file (merge-pathnames module-config path))

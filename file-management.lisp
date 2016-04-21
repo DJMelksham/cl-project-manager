@@ -1,3 +1,5 @@
+(in-package #:peasant)
+
 (defun get-subfolders (path &optional (inclusive nil))
   (let ((result (if inclusive (list (cl-fad:pathname-as-directory (truename (pathname path)))) nil))
 	(dirs (remove-if-not #'cl-fad:directory-pathname-p
