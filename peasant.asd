@@ -16,6 +16,7 @@
                (:file "document-functions")
 	       (:file "file-management")
 	       (:file "config-low-level-functions")
-	       (:file "module-management"))
+	       (:file "module-management")
+	       (:file "redux"))
 
-  :depends-on (#:cl-fad #:testy #:gittest))
+  :depends-on (#:cl-fad #:testy #:gittest #:quickproject #:uiop #:quicklisp))
