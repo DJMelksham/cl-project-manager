@@ -7,7 +7,7 @@
 
 (defun active-project (system-keyword &key test-path)
     ;;set active project
-    ;;also make sure active-ness is set in gittest and possibly testy?
+    ;;also make sure active-ness is set in gittest and testy?
   (if (and (symbolp *active-project*)
 	   (pathnamep *active-project*)
 	   (pathnamep *test-path*)
@@ -16,21 +16,24 @@
 		      'string
 		      "Sir, you already have an active project "
 		      *active-project*
-		      "with tests defined.  Serialise current tests before changing projects?")))
-      (testy:serialise-tests *test-path*))
+		      "with tests defined.  Write currently loaded tests to disk before changing projects?")))
+      (progn
+	(testy:delete-all-tests-in-dir *test-path*)
+	(testy:serialise-tests *test-path*)))
 
       (testy:deregister-tests (testy:all-tests))
 
       (setf *active-project* system-keyword)
       (setf *active-project-path* (asdf:system-source-directory system-keyword))
 
-      (print test-path)
       (if (null test-path)
 	  (setf *test-path*
 		(uiop:merge-pathnames*
 		 (uiop:ensure-directory-pathname *test-folder-name*)
 		 (asdf:system-source-directory system-keyword))))
       (asdf/cl:ensure-directories-exist *test-path*)
+
+      (testy:set-testy-active-project *test-path* *active-project*)
 
       (gittest:set-gittest-active-directory *active-project-path*)
 
@@ -112,19 +115,41 @@
 		       (message "Automatic peasant commit!")
 		       (remote "origin")
 		       (branch (git-branch)))
-    
+
+  (let ((tests-written 0)
+	(git-commit-before-save (string-right-trim 
+				 '(#\Space #\Newline #\Backspace #\Tab 
+				   #\Linefeed #\Page #\Return #\Rubout)
+				 (gittest:git "rev-parse HEAD")))
+	(git-commit-after-save ""))
+  
   ;; write tests
   (if write-tests
-      (testy:serialise-tests *test-path*))
+      (progn
+	(testy:delete-all-tests-in-dir *test-path*) 
+	(setf tests-written (testy:serialise-tests *test-path*))))
 
   ;; git add commit push
   (git-add-commit-push :message message :remote remote :branch branch)
 
+  (setf git-commit-after-save (string-right-trim 
+			       '(#\Space #\Newline #\Backspace #\Tab 
+				 #\Linefeed #\Page #\Return #\Rubout)
+			       (gittest:git "rev-parse HEAD")))
   ;;
-  (format t "~&ACTIVE PROJECT: ~a~&PROJECT PATH: ~a~&TESTS PATH: ~a~&~a TESTS SAVED"
+  (format t "~&ACTIVE PROJECT: ~a~&PROJECT PATH: ~a~&TESTS PATH: ~a~&~a TESTS SAVED~&PREVIOUS GIT COMMIT: ~a~&LATEST GIT COMMIT: ~a~& "
 	      *active-project*
 	      *active-project-path*
 	      *test-path*
-	      (testy:stat-number-tests (testy:all-tests))))
-  
+	      tests-written
+	      git-commit-before-save
+	      git-commit-after-save)
+
+  (if (equal git-commit-before-save git-commit-after-save)
+      (format t "Something appears to have gone wrong with the commit.  Before and after commits are still the same!"))
+
+  (if (not (search git-commit-after-save (gittest:git (concatenate 'string "ls-remote " branch))))
+      (format t "Something appears to have gone wrong with pushing to the remote server. 
+Commit hashes of local and remote are not lining up like I think they should."))))
+							     
   
