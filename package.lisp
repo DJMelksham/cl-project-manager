@@ -4,4 +4,7 @@
 	:testy
 	:quickproject
 	:gittest)
-  (:shadow :make-project))
+  (:export #:active-project
+	   #:make-project
+	   #:save-project)
+  (:shadow #:make-project))

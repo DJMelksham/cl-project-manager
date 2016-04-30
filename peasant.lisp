@@ -9,14 +9,14 @@
     ;;set active project
     ;;also make sure active-ness is set in gittest and testy?
   (if (and (symbolp *active-project*)
-	   (pathnamep *active-project*)
+	   (pathnamep *active-project-path*)
 	   (pathnamep *test-path*)
 	   (not (= (testy:stat-number-tests (testy:all-tests)) 0))
 	   (y-or-n-p (concatenate
 		      'string
 		      "Sir, you already have an active project "
-		      *active-project*
-		      "with tests defined.  Write currently loaded tests to disk before changing projects?")))
+		      (string *active-project*)
+		      " with tests defined.  Write currently loaded tests to disk before changing projects?")))
       (progn
 	(testy:delete-all-tests-in-dir *test-path*)
 	(testy:serialise-tests *test-path*)))
@@ -37,7 +37,7 @@
 
       (gittest:set-gittest-active-directory *active-project-path*)
 
-      (testy:load-tests *test-path*)
+      (testy:load-tests)
 
       (format t "~&ACTIVE PROJECT: ~a~&PROJECT PATH: ~a~&TESTS PATH: ~a~&~a TESTS LOADED"
 	      *active-project*
