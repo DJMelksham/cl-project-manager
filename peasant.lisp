@@ -132,7 +132,7 @@
   ;; git add commit push
   (git-add-commit-push :message message :remote remote :branch branch)
 
-  (setf git-commit-after-save (string-right-trim 
+  (setf git-commit-after-save (string-trim 
 			       '(#\Space #\Newline #\Backspace #\Tab 
 				 #\Linefeed #\Page #\Return #\Rubout)
 			       (gittest:git "rev-parse HEAD")))
