@@ -148,7 +148,7 @@
   (if (equal git-commit-before-save git-commit-after-save)
       (format t "Something appears to have gone wrong with the commit.  Before and after commits are still the same!"))
 
-  (if (not (search git-commit-after-save (gittest:git (concatenate 'string "ls-remote " branch))))
+  (if (not (print (search git-commit-after-save (print (gittest:git (concatenate 'string "ls-remote " remote))))))
       (format t "Something appears to have gone wrong with pushing to the remote server. 
 Commit hashes of local and remote are not lining up like I think they should."))))
 							     
