@@ -6,8 +6,8 @@
 (defvar *test-path* nil)
 
 (defun active-project (system-keyword &key test-path)
-    ;;set active project
-    ;;also make sure active-ness is set in gittest and testy?
+  ;;set active project
+  ;;also make sure active-ness is set in gittest and testy?
   (if (and (symbolp *active-project*)
 	   (pathnamep *active-project-path*)
 	   (pathnamep *test-path*)
@@ -20,30 +20,44 @@
       (progn
 	(testy:delete-all-tests-in-dir *test-path*)
 	(testy:serialise-tests *test-path*)))
-
-      (testy:deregister-tests (testy:all-tests))
-
-      (setf *active-project* system-keyword)
-      (setf *active-project-path* (asdf:system-source-directory system-keyword))
-
-      (if (null test-path)
-	  (setf *test-path*
-		(uiop:merge-pathnames*
-		 (uiop:ensure-directory-pathname *test-folder-name*)
-		 (asdf:system-source-directory system-keyword))))
-      (asdf/cl:ensure-directories-exist *test-path*)
-
-      (testy:set-testy-active-project *test-path* *active-project*)
-
-      (gittest:set-gittest-active-directory *active-project-path*)
-
-      (testy:load-tests)
-
-      (format t "~&ACTIVE PROJECT: ~a~&PROJECT PATH: ~a~&TESTS PATH: ~a~&~a TESTS LOADED"
-	      *active-project*
-	      *active-project-path*
-	      *test-path*
-	      (testy:stat-number-tests (testy:all-tests))))
+  
+  (testy:deregister-tests (testy:all-tests))
+  
+  ;; Load project if not already loaded
+  ;; Assumes quicklisp already installed and loaded
+  ;; and package findable by system-keyword
+  
+  (if (not (find-package system-keyword))
+      (ql:quickload system-keyword))
+  
+  ;; Abort if can't find package loaded
+  (if (not (find-package system-keyword))
+      (return-from active-project (format t "Unable to load/find system called ~a" system-keyword))) 
+  
+  (setf *active-project* system-keyword)
+  (setf *active-project-path* (asdf:system-source-directory system-keyword))
+  
+  (if (null test-path)
+      (setf *test-path*
+	    (uiop:merge-pathnames*
+	     (uiop:ensure-directory-pathname *test-folder-name*)
+	     (asdf:system-source-directory system-keyword))))
+  (asdf/cl:ensure-directories-exist *test-path*)
+  
+  (testy:set-testy-active-project *test-path* *active-project*)
+  
+  (gittest:set-gittest-active-directory *active-project-path*)
+  
+  (testy:load-tests)
+  
+  (format t "~&ACTIVE PROJECT: ~a~&PROJECT PATH: ~a~&TESTS PATH: ~a~&~a TESTS LOADED"
+	  *active-project*
+	  *active-project-path*
+	  *test-path*
+	  (testy:stat-number-tests (testy:all-tests)))
+  
+  (setf *package* (find-package system-keyword)))
+	   
       
 
 (defun make-project
